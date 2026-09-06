@@ -5,7 +5,7 @@
 |---|---|
 | Curso / Disciplina | `Estrutura de Dados II` |
 | Projeto integrador | `Entrutura de Dados II, Redes de Computadores e Análise e Projeto de Sistemas` |
-| Orientador(a) | `Professora Andréia` |
+| Orientador(a) | `Professora Andrea ono Sakai` |
 | Data de entrega desta etapa | `08/09/2026` |
 | Integrantes do grupo | `Eduardo Gabriel de Souza Cardozo, Gabriel Alves de Farias, Gisele Franco de Lima, Luigi Santos Caires, Rodrigo de Souza Galvão` |
 
@@ -25,7 +25,7 @@ A equipe precisa decidir entre utilizar um dataset real de medições ICMP já p
 
 <!-- O que foi encontrado sobre um dataset real de ICMP. Cite a fonte de cada informação. -->
 
-- **Origem / link:** Hats Network — Global Latency Measurements
+- **Origem / link:** [Hats Network — Global Latency Measurements](https://hatsnet.io/opendata/latency/)
 - **Formato:** CSV, JSON e YAML. O dataset disponibiliza tanto séries de pings individuais quanto estatísticas agregadas.
 - **Período coberto:** O dataset possui versões diárias; a versão consultada é de 08/08/2026. Novas versões são publicadas diariamente quando há novas medições.
 - **Campos disponíveis:** Nos registros individuais: from, to, round_id, seq, offset_ms e rtt_ms. Também existem estatísticas agregadas como rtt_avg, rtt_min, rtt_max, rtt_stdev, jitter_ms e packet_loss_percent.
@@ -39,7 +39,7 @@ O Hats Network Global Latency Measurements é um dataset público produzido a pa
 
 <!-- O que foi encontrado sobre a API: autenticação, criação e consulta de medições. Cite a fonte de cada informação. -->
 
-- **Documentação consultada (link):** https://atlas.ripe.net/docs/getting-started/
+- **Documentação consultada (link):** [RIPE Atlas API Docs](https://atlas.ripe.net/docs/getting-started/)
 
 - **Autenticação exigida:** Para utilizar a API para ver medições não precisa de chave mas para fazer medições precisamos da chave da api e creditos, e para criarmos uma chave precisaremos fazer uma conta no site https://atlas.ripe.net/
 
@@ -98,40 +98,38 @@ Alguns dos riscos e limitações identificadas em relação ao `Dataset real`:
 
 <!-- cada integrante deve descrever, com suas próprias palavras, o que efetivamente fez nesta etapa. Contribuições genéricas como "ajudei em tudo" não serão aceitas. Use verbos de ação e seja específico (ex.: "pesquisei , analisei, testei, ... apresentei prós/contras ao grupo, ...").-->
 
-### Integrante 1 — `[Escreva nome completo do aluno ]`
+### Integrante 1 — `Eduardo Gabriel de Souza Cardozo`
+- **O que fez nesta etapa:** `Pesquisei e resumi as informações para o 2.B dataset real, estava entre algumas opções para escolher, entre elas estava o Zenodo que tinha produzido dados reais a patir de uma operadora brasileira, porém, optei pelo Hats Network Global Latency Measurements pois ele afirmava explicitamente que usava dados reais a partir de medições ICMP Echo.`
+- **Tempo dedicado (aprox.):** `1h30`
+- **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*:
+![alt text](images/memorando_decisao_evidencias/evidencia_eduardo.png)
+
+### Integrante 2 — `Gabriel Alves de Farias`
 - **O que fez nesta etapa:** `[]`
 - **Tempo dedicado (aprox.):** `[ex.: 3h30]`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*:
 `[]` 
 `[]`
 
-### Integrante 2 — `[Escreva nome completo do aluno ]`
-- **O que fez nesta etapa:** `[]`
-- **Tempo dedicado (aprox.):** `[ex.: 3h30]`
-- **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*:
-`[]` 
-`[]`
-
-### Integrante 3 — `[Escreva nome completo do aluno ]`
+### Integrante 3 — `Gisele Franco de Lima`
 - **O que fez nesta etapa:** `[]`
 - **Tempo dedicado (aprox.):** `[ex.: 3h30]`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*: 
 `[]` 
 `[]`
 
-### Integrante 4 — `[Escreva nome completo do aluno ]`
+### Integrante 4 — `Luigi Santos Caires`
 - **O que fez nesta etapa:** `[]`
 - **Tempo dedicado (aprox.):** `[ex.: 3h30]`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*: 
 `[]` 
 `[]`
 
-### Integrante 5 — `[Escreva nome completo do aluno ]`
-- **O que fez nesta etapa:** `[]`
-- **Tempo dedicado (aprox.):** `[ex.: 3h30]`
+### Integrante 5 — `Rodrigo de Souza Galvão`
+- **O que fez nesta etapa:** `Criei o repositório do GitHub, revisei o arquivo e todas as suas seções, fiz alguns ajustes e adequações nos textos, e preenchi algumas seções`
+- **Tempo dedicado (aprox.):** `1h30`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*: 
-`[]` 
-`[]`
+![alt text](images/memorando_decisao_evidencias/evidencia_rodrigo.png)
 
 ---
 
