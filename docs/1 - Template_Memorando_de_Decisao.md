@@ -3,9 +3,9 @@
 
 | Campo | Informação |
 |---|---|
-| Curso / Disciplina | `Estrutura de Dados II` |
-| Projeto integrador | `Entrutura de Dados II, Redes de Computadores e Análise e Projeto de Sistemas` |
-| Orientador(a) | `Professora Andrea ono Sakai` |
+| Curso / Disciplina | `Ciência da Computação / Estrutura de Dados II` |
+| Projeto integrador | `Estrutura de Dados II, Redes de Computadores e Análise e Projeto de Sistemas` |
+| Orientador(a) | `Professora Andrea Ono Sakai` |
 | Data de entrega desta etapa | `08/09/2026` |
 | Integrantes do grupo | `Eduardo Gabriel de Souza Cardozo, Gabriel Alves de Farias, Gisele Franco de Lima, Luigi Santos Caires, Rodrigo de Souza Galvão` |
 
@@ -43,7 +43,7 @@ O Hats Network Global Latency Measurements é um dataset público produzido a pa
 
 - **Autenticação exigida:** Para utilizar a API para ver medições não precisa de chave mas para fazer medições precisamos da chave da api e creditos, e para criarmos uma chave precisaremos fazer uma conta no site https://atlas.ripe.net/
 
-- **Como se cria uma medição:** Precisa-se de créditos e uma chave API. Com esse requisitos atendidos, é preciso configurar a medição informando alguns parâmetros, como: description (Descrição da medida), target (endereço ip alvo), type (tipo de formato de medição, usaremos o ping) e af (Adress family) 
+- **Como se cria uma medição:** Precisa-se de créditos e uma chave API. Com esse requisitos atendidos, é preciso configurar a medição informando alguns parâmetros, como: description (Descrição da medida), target (endereço ip alvo), type (tipo de formato de medição, usaremos o ping) e af (address family) 
 
 - **Como se consultam os resultados:** Para consultar os resultados de uma medição, é necessário possuir o ID da medição e realizar uma requisição GET para o endpoint. Para fazer essa requisição deve-se usar a biblioteca `requests`, informando a URL: 
 
@@ -62,10 +62,10 @@ Na documentação do ripe atlas sobre a API rest que utilizaremos encontramos co
 
 | Critério | Opção A — Dataset real | Opção B — API RIPE Atlas |
 |----------|------------------------|--------------------------|
-| Controle sobre a coleta | Baixo - dados já foram coletados|                   Alto - permite configurar as próprias medições |
-| Diversidade geográfica |  Restrita à cobertura do dataset | Alta / Global|
-| Custo / complexidade de implementação | Baixo | Alto - integração com a API, autenticação, configuração das medições |
-| Tempo até os primeiros dados estarem disponíveis | Imediato - dados já estão disponíveis no arquivo | Variável - depende da criação/execução da medição e retorno dos resultados|
+| Controle sobre a coleta | **Baixo** - dados já foram coletados|                   **Alto** - permite configurar as próprias medições |
+| Diversidade geográfica |  **Restrita** à cobertura do dataset | **Alta / Global**|
+| Custo / complexidade de implementação | **Baixo** | **Alto** - integração com a API, autenticação, configuração das medições |
+| Tempo até os primeiros dados estarem disponíveis | **Imediato** - dados já estão disponíveis no arquivo | **Variável** - depende da criação/execução da medição e retorno dos resultados|
 
 ## 5. Recomendação
 
@@ -77,7 +77,7 @@ Para o escopo do projeto recomenda-se o `Dataset real`, devido à disponibilide 
 
 <!-- Por que essa opção vence a outra, com base nas evidências das seções 2, 3 e 4 — não em preferência pessoal. -->
 
-A **opção A - Dataset real** é mais adequada para esta etapa, pois ela já diponibiliza os dados reais de ICMP, incluindo a latência, o jitter e a perda de pacotes, compatíveis com as variáveis do projeto. Além disso, os dados já ficam estruturados e disponíveis para uso, reduzindo o tempo e a complexidade inicial de implementação.
+A **opção A - Dataset real** é mais adequada para esta etapa, pois ela já disponibiliza os dados reais de ICMP, incluindo a latência, o jitter e a perda de pacotes, compatíveis com as variáveis do projeto. Além disso, os dados já ficam estruturados e disponíveis para uso, reduzindo o tempo e a complexidade inicial de implementação.
 
 Enquanto o **RIPE Atlas** oferece maior diversidade geográfica e permite realizar novas medições, a criação delas exige configuração da API, autenticação e a utilização de créditos. Portanto, o dataset apresenta melhor relação entre a disponibilidade, a simplicidade e tempo de implementação nesta fase do projeto.
 
@@ -99,7 +99,7 @@ Alguns dos riscos e limitações identificadas em relação ao `Dataset real`:
 <!-- cada integrante deve descrever, com suas próprias palavras, o que efetivamente fez nesta etapa. Contribuições genéricas como "ajudei em tudo" não serão aceitas. Use verbos de ação e seja específico (ex.: "pesquisei , analisei, testei, ... apresentei prós/contras ao grupo, ...").-->
 
 ### Integrante 1 — `Eduardo Gabriel de Souza Cardozo`
-- **O que fez nesta etapa:** `Pesquisei e resumi as informações para o 2.B dataset real, estava entre algumas opções para escolher, entre elas estava o Zenodo que tinha produzido dados reais a patir de uma operadora brasileira, porém, optei pelo Hats Network Global Latency Measurements pois ele afirmava explicitamente que usava dados reais a partir de medições ICMP Echo.`
+- **O que fez nesta etapa:** `Pesquisei e resumi as informações para a seção 2.A - dataset real. Estava entre algumas opções para escolher, entre elas estava o Zenodo que tinha produzido dados reais a partir de uma operadora brasileira, porém, optei pelo Hats Network Global Latency Measurements pois ele afirmava explicitamente que usava dados reais a partir de medições ICMP Echo.`
 - **Tempo dedicado (aprox.):** `1h30`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*:
 ![alt text](images/memorando_decisao_evidencias/evidencia_eduardo.png)
@@ -112,11 +112,15 @@ Alguns dos riscos e limitações identificadas em relação ao `Dataset real`:
 `[]`
 
 ### Integrante 3 — `Gisele Franco de Lima`
-- **O que fez nesta etapa:** `[]`
-- **Tempo dedicado (aprox.):** `[ex.: 3h30]`
+- **O que fez nesta etapa:** `Pesquisei as características do dataset real e da API do RIPE Atlas, analisei as vantagens e limitações de cada opção e elaborei a justificativa para a escolha do dataset real como fonte de dados do projeto.`
+- **Tempo dedicado (aprox.):** `1h30`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*: 
-`[]` 
-`[]`
+
+- `As imagens comprovam a minha contribuição, mostrando o envio do arquivo ao grupo e o conteúdo elaborado nas questões 01 e 06, incluindo a pesquisa e as fontes utilizadas.`
+
+![alt text](images/memorando_decisao_evidencias/evidencia_gisele.png)
+
+
 
 ### Integrante 4 — `Luigi Santos Caires`
 - **O que fez nesta etapa:** `[]`
