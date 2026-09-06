@@ -41,20 +41,16 @@ O Hats Network Global Latency Measurements é um dataset público produzido a pa
 
 - **Documentação consultada (link):** https://atlas.ripe.net/docs/getting-started/
 
-- **Autenticação exigida:** 
+- **Autenticação exigida:** Para utilizar a API para ver medições não precisa de chave mas para fazer medições precisamos da chave da api e creditos, e para criarmos uma chave precisaremos fazer uma conta no site https://atlas.ripe.net/
 
-Para utilizar a API para ver medições não precisa de chave mas para fazer medições precisamos da chave da api e creditos, e para criarmos uma chave precisaremos fazer uma conta no site https://atlas.ripe.net/. **COMO CRIAR UMA CHAVE:** https://atlas.ripe.net/docs/howtos/keys 
+- **Como se cria uma medição:** Precisa-se de créditos e uma chave API. Com esse requisitos atendidos, é preciso configurar a medição informando alguns parâmetros, como: description (Descrição da medida), target (endereço ip alvo), type (tipo de formato de medição, usaremos o ping) e af (Adress family) 
 
-**DOC:** https://atlas.ripe.net/docs/apis/rest-api-manual/authentication/
+- **Como se consultam os resultados:** Para consultar os resultados de uma medição, é necessário possuir o ID da medição e realizar uma requisição GET para o endpoint. Para fazer essa requisição deve-se usar a biblioteca `requests`, informando a URL: 
 
-- **Como se cria uma medição:** 
+    `https://atlas.ripe.net/api/v2/measurements/{ID da medição}/results/.`
 
-Precisa de creditos e uma chave api para criar uma medição, tendo os dois voce precisa especificar pelo menos um sendo ele, description (Descrição da medida), target (endereço ip alvo), type (tipo de formato de medição, usaremos o ping) e af (Adress family) **DOC:** https://atlas.ripe.net/docs/apis/rest-api-manual/measurements/
+    o ID da medição deve ser inserido na própria URL para acessar os dados correspondentes
 
-- **Como se consultam os resultados:**
-
-Para fazer uma consulta dos resultados é preciso ter o id da medição feita e fazer um get utilizando a biblioteca requests do python e passar a url dentro dos parametros https://atlas.ripe.net/api/v2/measurements/{ID da medição}/results/.
-**DOC:** https://atlas.ripe.net/docs/apis/rest-api-manual/measurements/results-and-latest
 
 **Resumo do que foi encontrado:**
 
@@ -66,16 +62,16 @@ Na documentação do ripe atlas sobre a API rest que utilizaremos encontramos co
 
 | Critério | Opção A — Dataset real | Opção B — API RIPE Atlas |
 |----------|------------------------|--------------------------|
-| Controle sobre a coleta | |Parcial|
-| Diversidade geográfica | |Global|
-| Custo / complexidade de implementação | |Alto|
-| Tempo até os primeiros dados estarem disponíveis | |Depende|
+| Controle sobre a coleta | Baixo - dados já foram coletados|                   Alto - permite configurar as próprias medições |
+| Diversidade geográfica |  Restrita à cobertura do dataset | Alta / Global|
+| Custo / complexidade de implementação | Baixo | Alto - integração com a API, autenticação, configuração das medições |
+| Tempo até os primeiros dados estarem disponíveis | Imediato - dados já estão disponíveis no arquivo | Variável - depende da criação/execução da medição e retorno dos resultados|
 
 ## 5. Recomendação
 
 <!-- Uma frase direta: qual opção você recomenda. -->
 
-[Escreva aqui]
+Para o escopo do projeto recomenda-se o `Dataset real`, devido à disponibilide dos dados e a simplificação da implementação.
 
 ## 6. Justificativa
 
@@ -83,13 +79,20 @@ Na documentação do ripe atlas sobre a API rest que utilizaremos encontramos co
 
 A **opção A - Dataset real** é mais adequada para esta etapa, pois ela já diponibiliza os dados reais de ICMP, incluindo a latência, o jitter e a perda de pacotes, compatíveis com as variáveis do projeto. Além disso, os dados já ficam estruturados e disponíveis para uso, reduzindo o tempo e a complexidade inicial de implementação.
 
-Enquanto o **RIPE Atlas** oferece maior diversidade geográfica e permite realizar novas medições, mas a criação delas exige configuração da API, autenticação e a utilização de créditos. Portanto, o dataset apresenta melhor relação entre a disponibilidade, a simplicidade e tempo de implementação nesta fase do projeto.
+Enquanto o **RIPE Atlas** oferece maior diversidade geográfica e permite realizar novas medições, a criação delas exige configuração da API, autenticação e a utilização de créditos. Portanto, o dataset apresenta melhor relação entre a disponibilidade, a simplicidade e tempo de implementação nesta fase do projeto.
 
 ## 7. Riscos e limitações
 
 <!-- O que pode dar errado com a opção escolhida, e como isso poderia ser mitigado. -->
+Alguns dos riscos e limitações identificadas em relação ao `Dataset real`:
 
-[Escreva aqui]
+| Risco / Limitação apresentada | Descrição do Risco | Mitigação |
+|-------------------|--------------------|-----------|
+| Dados desatualizados | O modelo é treinado com dados históricos que podem não representar condições futuras da rede| Utilizar versões recentes do dataset e atualizar periodicamente os dados utilizados para treinamento |
+| Falta de controle sobre a coleta | Não há controle sobre como, quando e onde as medições são realizadas | conhecer a metodologia de coleta e validar se os dados disponíveis atendem as necessidades do pipeline antes do treinamento |
+| Poucos exemplos de falhas | É possível que a grande maioria das medições represente uma rede funcionando normalmente, podendo levar a um desbalanceamento de classes | Verificar a distribuição das classes antes do treinamento e aplicar técnicas adequadas de balanceamento em caso de diferença muito grande | 
+
+
 
 ## 8. Contribuição Individual dos Integrantes
 
