@@ -4,10 +4,10 @@
 | Campo | Informação |
 |---|---|
 | Curso / Disciplina | `Ciência da Computação / Estrutura de Dados II` |
-| Projeto integrador | `Estrutura de Dados II, Redes de Computadores e Análise e Projeto de Sistemas` |
+| Projeto integrador | `Estrutura de Dados II`<br> `Redes de Computadores`<br> `Análise e Projeto de Sistemas` |
 | Orientador(a) | `Professora Andrea Ono Sakai` |
 | Data de entrega desta etapa | `08/09/2026` |
-| Integrantes do grupo | `Eduardo Gabriel de Souza Cardozo, Gabriel Alves de Farias, Gisele Franco de Lima, Luigi Santos Caires, Rodrigo de Souza Galvão` |
+| Integrantes do grupo | `Eduardo Gabriel de Souza Cardozo`<br> `Gabriel Alves de Farias`<br> `Gisele Franco de Lima`<br> `Luigi Santos Caires`<br> `Rodrigo de Souza Galvão` |
 
 ---
 
@@ -29,7 +29,7 @@ A equipe precisa decidir entre utilizar um dataset real de medições ICMP já p
 - **Formato:** CSV, JSON e YAML. O dataset disponibiliza tanto séries de pings individuais quanto estatísticas agregadas.
 - **Período coberto:** O dataset possui versões diárias; a versão consultada é de 08/08/2026. Novas versões são publicadas diariamente quando há novas medições.
 - **Campos disponíveis:** Nos registros individuais: from, to, round_id, seq, offset_ms e rtt_ms. Também existem estatísticas agregadas como rtt_avg, rtt_min, rtt_max, rtt_stdev, jitter_ms e packet_loss_percent.
-- **Licença de uso:** CC BY 4.0 (Creative Commons Attribution 4.0 International). Permite compartilhar e adaptar os dados, desde que seja dado o devido crédito
+- **Licença de uso:** CC BY 4.0 (Creative Commons Attribution 4.0 International). Permite compartilhar e adaptar os dados, desde que seja dado o devido crédito.
 
 **Resumo do que foi encontrado:**
 
@@ -41,20 +41,20 @@ O Hats Network Global Latency Measurements é um dataset público produzido a pa
 
 - **Documentação consultada (link):** [RIPE Atlas API Docs](https://atlas.ripe.net/docs/getting-started/)
 
-- **Autenticação exigida:** Para utilizar a API para ver medições não precisa de chave mas para fazer medições precisamos da chave da api e creditos, e para criarmos uma chave precisaremos fazer uma conta no site https://atlas.ripe.net/
+- **Autenticação exigida:** Para utilizar a API para ver medições, não é necessária uma chave, mas para fazer medições, precisamos da chave da API e créditos. Para obter uma chave de API precisaremos criar uma conta no site https://atlas.ripe.net/.
 
-- **Como se cria uma medição:** Precisa-se de créditos e uma chave API. Com esse requisitos atendidos, é preciso configurar a medição informando alguns parâmetros, como: description (Descrição da medida), target (endereço ip alvo), type (tipo de formato de medição, usaremos o ping) e af (address family) 
+- **Como se cria uma medição:** Precisa-se de créditos e uma chave API. Com esses requisitos atendidos, é preciso configurar a medição informando alguns parâmetros, como: description (descrição da medição), target (endereço IP alvo), type (tipo de formato de medição, usaremos o ping) e af (address family) 
 
 - **Como se consultam os resultados:** Para consultar os resultados de uma medição, é necessário possuir o ID da medição e realizar uma requisição GET para o endpoint. Para fazer essa requisição deve-se usar a biblioteca `requests`, informando a URL: 
 
-    `https://atlas.ripe.net/api/v2/measurements/{ID da medição}/results/.`
+    `https://atlas.ripe.net/api/v2/measurements/{ID da medição}/results/`.
 
-    o ID da medição deve ser inserido na própria URL para acessar os dados correspondentes
+    O ID da medição deve ser inserido na própria URL para acessar os dados correspondentes.
 
 
 **Resumo do que foi encontrado:**
 
-Na documentação do ripe atlas sobre a API rest que utilizaremos encontramos como fazer um request get e post, criar chaves e o mais importante como fazer e pegar medições publicas.
+Na documentação do RIPE Atlas sobre a API REST que utilizaremos, encontramos como fazer requisições GET e POST, criar chaves de API e o mais importante como realizar e obter medições públicas.
 
 ## 4. Comparação
 
@@ -71,7 +71,7 @@ Na documentação do ripe atlas sobre a API rest que utilizaremos encontramos co
 
 <!-- Uma frase direta: qual opção você recomenda. -->
 
-Para o escopo do projeto recomenda-se o `Dataset real`, devido à disponibilide dos dados e a simplificação da implementação.
+Para o escopo do projeto recomenda-se o `Dataset real`, devido à disponibilidade dos dados e à simplificação da implementação.
 
 ## 6. Justificativa
 
@@ -79,17 +79,17 @@ Para o escopo do projeto recomenda-se o `Dataset real`, devido à disponibilide 
 
 A **opção A - Dataset real** é mais adequada para esta etapa, pois ela já disponibiliza os dados reais de ICMP, incluindo a latência, o jitter e a perda de pacotes, compatíveis com as variáveis do projeto. Além disso, os dados já ficam estruturados e disponíveis para uso, reduzindo o tempo e a complexidade inicial de implementação.
 
-Enquanto o **RIPE Atlas** oferece maior diversidade geográfica e permite realizar novas medições, a criação delas exige configuração da API, autenticação e a utilização de créditos. Portanto, o dataset apresenta melhor relação entre a disponibilidade, a simplicidade e tempo de implementação nesta fase do projeto.
+Enquanto o **RIPE Atlas** oferece maior diversidade geográfica e permite realizar novas medições, a criação delas exige configuração da API, autenticação e a utilização de créditos. Portanto, o dataset apresenta melhor relação entre a disponibilidade, a simplicidade e o tempo de implementação nesta fase do projeto.
 
 ## 7. Riscos e limitações
 
 <!-- O que pode dar errado com a opção escolhida, e como isso poderia ser mitigado. -->
-Alguns dos riscos e limitações identificadas em relação ao `Dataset real`:
+Alguns dos riscos e limitações identificados em relação ao `Dataset real`:
 
 | Risco / Limitação apresentada | Descrição do Risco | Mitigação |
 |-------------------|--------------------|-----------|
 | Dados desatualizados | O modelo é treinado com dados históricos que podem não representar condições futuras da rede| Utilizar versões recentes do dataset e atualizar periodicamente os dados utilizados para treinamento |
-| Falta de controle sobre a coleta | Não há controle sobre como, quando e onde as medições são realizadas | conhecer a metodologia de coleta e validar se os dados disponíveis atendem as necessidades do pipeline antes do treinamento |
+| Falta de controle sobre a coleta | Não há controle sobre como, quando e onde as medições são realizadas | Conhecer a metodologia de coleta e validar se os dados disponíveis atendem às necessidades do pipeline antes do treinamento |
 | Poucos exemplos de falhas | É possível que a grande maioria das medições represente uma rede funcionando normalmente, podendo levar a um desbalanceamento de classes | Verificar a distribuição das classes antes do treinamento e aplicar técnicas adequadas de balanceamento em caso de diferença muito grande | 
 
 
@@ -105,11 +105,10 @@ Alguns dos riscos e limitações identificadas em relação ao `Dataset real`:
 ![alt text](images/memorando_decisao_evidencias/evidencia_eduardo.png)
 
 ### Integrante 2 — `Gabriel Alves de Farias`
-- **O que fez nesta etapa:** `[]`
-- **Tempo dedicado (aprox.):** `[ex.: 3h30]`
+- **O que fez nesta etapa:** `Minha contribuição foi na revisão do trabalho, corrigindo erros de ortografia e propondo ajustes visuais para melhorar a compreensão do conteúdo e garantir maior alinhamento com os critérios exigidos.`
+- **Tempo dedicado (aprox.):** `1h30`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*:
-`[]` 
-`[]`
+![alt text](images/memorando_decisao_evidencias/evidencia_gabriel.png)
 
 ### Integrante 3 — `Gisele Franco de Lima`
 - **O que fez nesta etapa:** `Pesquisei as características do dataset real e da API do RIPE Atlas, analisei as vantagens e limitações de cada opção e elaborei a justificativa para a escolha do dataset real como fonte de dados do projeto.`
@@ -123,14 +122,13 @@ Alguns dos riscos e limitações identificadas em relação ao `Dataset real`:
 
 
 ### Integrante 4 — `Luigi Santos Caires`
-- **O que fez nesta etapa:** `[]`
-- **Tempo dedicado (aprox.):** `[ex.: 3h30]`
+- **O que fez nesta etapa:** `Ajudei na pesquisa de como utilizar a API vendo a documentação da API REST do RIPE Atlas e como utilizá-la, além de seus pontos fortes e fracos.`
+- **Tempo dedicado (aprox.):** `1h30`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*: 
-`[]` 
-`[]`
+![alt text](images/memorando_decisao_evidencias/evidencia_luigi.png)
 
 ### Integrante 5 — `Rodrigo de Souza Galvão`
-- **O que fez nesta etapa:** `Criei o repositório do GitHub, revisei o arquivo e todas as suas seções, fiz alguns ajustes e adequações nos textos, e preenchi algumas seções`
+- **O que fez nesta etapa:** `Criei o repositório do GitHub, revisei o arquivo e todas as suas seções, fiz alguns ajustes e adequações nos textos, e preenchi algumas seções.`
 - **Tempo dedicado (aprox.):** `1h30`
 - **Evidência da contribuição** *(print de conversa, rascunho, e-mail, documento compartilhado etc.)*: 
 ![alt text](images/memorando_decisao_evidencias/evidencia_rodrigo.png)
