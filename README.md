@@ -6,6 +6,14 @@ Este projeto será desenvolvido com interdisciplinalidade entre as disciplinas:
 - Análise e Projeto de Sistemas
 - Estrutura de Dados II
 
+## Equipe:
+
+- Eduardo Gabriel de Souza Cardozo
+- Gabriel Alves de Farias
+- Gisele Franco de Lima
+- Luigi Santos Caires
+- Rodrigo de Souza Galvão
+
 ## Metodologia:
 
 A metodologia adotada para esse projeto será a SCRUM
