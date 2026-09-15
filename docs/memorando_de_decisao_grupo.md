@@ -39,22 +39,73 @@ O Hats Network Global Latency Measurements é um dataset público produzido a pa
 
 <!-- O que foi encontrado sobre a API: autenticação, criação e consulta de medições. Cite a fonte de cada informação. -->
 
-- **Documentação consultada (link):** [RIPE Atlas API Docs](https://atlas.ripe.net/docs/getting-started/)
-
-- **Autenticação exigida:** Para utilizar a API para ver medições, não é necessária uma chave, mas para fazer medições, precisamos da chave da API e créditos. Para obter uma chave de API precisaremos criar uma conta no site https://atlas.ripe.net/.
-
-- **Como se cria uma medição:** Precisa-se de créditos e uma chave API. Com esses requisitos atendidos, é preciso configurar a medição informando alguns parâmetros, como: description (descrição da medição), target (endereço IP alvo), type (tipo de formato de medição, usaremos o ping) e af (address family) 
-
-- **Como se consultam os resultados:** Para consultar os resultados de uma medição, é necessário possuir o ID da medição e realizar uma requisição GET para o endpoint. Para fazer essa requisição deve-se usar a biblioteca `requests`, informando a URL: 
-
-    `https://atlas.ripe.net/api/v2/measurements/{ID da medição}/results/`.
-
-    O ID da medição deve ser inserido na própria URL para acessar os dados correspondentes.
+- **Documentação consultada (links):** <br>
+    - [REST API Manual](https://atlas.ripe.net/docs/getting-started/)<br>
+    - [Autenticação](https://atlas.ripe.net/docs/apis/rest-api-manual/authentication/)<br>
+    - [Chave API](https://atlas.ripe.net/docs/apis/rest-api-manual/authentication/api-keys/)
+    - [Criando Medidas](https://atlas.ripe.net/docs/apis/rest-api-manual/measurements/creating-measurements/)<br>
+    - [Definição das Medidas](https://atlas.ripe.net/docs/apis/rest-api-manual/measurements/creating-measurements/definitions/)<br>
+    - [Seleção de Probes](https://atlas.ripe.net/docs/apis/rest-api-manual/measurements/creating-measurements/probe-selection)<br>
+    - [Resultados](https://atlas.ripe.net/docs/apis/rest-api-manual/measurements/results-and-latest)<br>
+    - [Créditos](https://atlas.ripe.net/docs/getting-started/credits/)
 
 
-**Resumo do que foi encontrado:**
 
-Na documentação do RIPE Atlas sobre a API REST que utilizaremos, encontramos como fazer requisições GET e POST, criar chaves de API e o mais importante como realizar e obter medições públicas.
+- **Autenticação exigida:** De acordo com a documentação, grande parte das operações de consulta da API, incluindo o acesso a medições públicas, não precisa de uma chave de API. Entretanto, para criar medições próprias, é necessário utilizar uma chave com as permissões adequadas.
+
+    Para obter uma chave, é necessário possuir uma conta no RIPE NCC Access e realizar sua configuração na área de chaves de API do RIPE Atlas. A chave deve ser mantida em segurança, pois permite realizar operações autorizadas em nome da conta.
+
+- **Configurando chaves:** A chave de API deve ser enviada no cabeçalho da requisição HTTP utilizando o esquema Key. O formato esperado é:
+
+    ``` bash
+    Authorization: Key SUA_CHAVE
+    ```
+
+    Dessa forma, a chave não precisa ser inserida diretamente na URL da requisição. As permissões associadas à chave determinam quais operações autenticadas podem ser realizadas.
+
+- **Como se cria uma medição e define métricas:** Para criar uma medição própria, deve-se realizar uma requisição HTTP do tipo POST para o endpoint:
+
+    ``` bash
+    https://atlas.ripe.net/api/v2/measurements/
+    ```
+
+    A requisição deve conter um corpo em formato JSON com as configurações da medição. Entre os principais elementos estão:
+
+    definitions: especifica o que será medido;<br>
+    probes: especifica de quais probes a medição será realizada.
+
+    Na definição da medição, alguns parâmetros importantes são:
+
+    description: descrição da medição;<br>
+    type: tipo de medição, sendo utilizado neste projeto o tipo ping;<br>
+    target: endereço IP ou destino que será medido;<br>
+    af: família de endereços utilizada, sendo 4 para IPv4 e 6 para IPv6.
+
+    No caso do tipo ping, a medição utiliza requisições ICMP para obter informações como tempo de resposta. A seleção das probes é importante porque determina a origem das medições e pode ser configurada por critérios como país, região, ASN ou probes específicas.
+
+    Após a criação, a API retorna um identificador da medição, que será utilizado para consultar seus resultados.
+
+- **Como se consultam os resultados:** Para consultar os Para consultar os resultados de uma medição, é necessário possuir seu ID e realizar uma requisição HTTP do tipo GET para o endpoint:
+
+    `https://atlas.ripe.net/api/v2/measurements/{ID_DA_MEDIÇÃO}/results/`
+
+    Em Python, essa consulta pode ser realizada utilizando a biblioteca requests. O ID da medição deve ser inserido na própria URL para que a API retorne os dados correspondentes à medição selecionada.
+
+    Os resultados obtidos poderão ser processados pelo projeto para extrair ou organizar informações relacionadas à latência, perda de pacotes e jitter. Posteriormente, esses dados poderão ser agrupados em janelas temporais para formar as entradas do preditor, representadas por:
+
+    X = [latência, perda, jitter]
+
+- **Créditos para criação de medidas:** O RIPE Atlas utiliza um sistema de créditos relacionado à realização de medições criadas pelos usuários. O consumo de créditos depende da configuração da medição e da quantidade de resultados produzidos.
+
+    Dessa forma, o custo não está necessariamente relacionado apenas ao envio da requisição HTTP, mas à execução da medição e aos recursos utilizados. Fatores como o tipo de medição, a quantidade de probes, a periodicidade e a duração podem influenciar o consumo.
+
+    Por esse motivo, antes de criar medições próprias para o projeto, será necessário verificar a disponibilidade de créditos da conta e escolher uma configuração compatível com o objetivo da coleta.
+
+- **Resumo do que foi encontrado:**
+
+    A documentação do RIPE Atlas apresenta os procedimentos necessários para utilizar sua API REST, incluindo autenticação, criação de chaves, criação de medições por meio de requisições POST e consulta de resultados por meio de requisições GET.
+
+    Também foi identificado que a criação de uma medição envolve tanto a definição do que será medido, por meio de definitions, quanto a seleção das probes responsáveis pela coleta. Os resultados obtidos pela API podem servir como fonte para a construção de uma base temporal contendo latência, perda de pacotes e jitter, que posteriormente poderá ser utilizada na formação das entradas do preditor.
 
 ## 4. Comparação
 
@@ -71,7 +122,7 @@ Na documentação do RIPE Atlas sobre a API REST que utilizaremos, encontramos c
 
 <!-- Uma frase direta: qual opção você recomenda. -->
 
-Para o escopo do projeto recomenda-se o `Dataset real`, devido à disponibilidade dos dados e à simplificação da implementação.
+Para o escopo do projeto recomenda-se a utilização da `RIPE Atlas API`, devido à flexibilidade dos dados e à possibilidade de criação de medidas personalizadas.
 
 ## 6. Justificativa
 
