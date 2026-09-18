@@ -1,0 +1,16 @@
+{
+    "measurement_id": 1001,
+    "url": "https://atlas.ripe.net/api/v2/measurements/1001/results/",
+    "params": {
+        "start": "2026-09-18T20:07:11.372820",
+        "stop": "2026-09-18T20:17:11.372820",
+        "public_only": "true"
+    },
+    "start_datetime": "2026-09-18T20:07:11.372820",
+    "stop_datetime": "2026-09-18T20:17:11.372820",
+    "request_start_time": "2026-09-18T20:17:20.184632",
+    "total_records": 34792,
+    "total_columns": 25,
+    "json_file": "../raw/ripe_atlas_m1001_20260918T201720.json",
+    "df_file": "../raw/ripe_atlas_m1001_20260918T201720.csv"
+}
