@@ -128,20 +128,23 @@ Para o escopo do projeto recomenda-se a utilização da `RIPE Atlas API`, devido
 
 <!-- Por que essa opção vence a outra, com base nas evidências das seções 2, 3 e 4 — não em preferência pessoal. -->
 
-A **opção A - Dataset real** é mais adequada para esta etapa, pois ela já disponibiliza os dados reais de ICMP, incluindo a latência, o jitter e a perda de pacotes, compatíveis com as variáveis do projeto. Além disso, os dados já ficam estruturados e disponíveis para uso, reduzindo o tempo e a complexidade inicial de implementação.
+A **`opção B - API RIPE Atlas`** é mais adequada ao escopo do projeto, pois permite maior controle sobre a coleta dos dados e possibilita configurar medições de acordo com as necessidades do preditor. A API permite selecionar diferentes probes e definir parâmetros das medições, possibilitando obter dados de diferentes origens e cenários de rede.
 
-Enquanto o **RIPE Atlas** oferece maior diversidade geográfica e permite realizar novas medições, a criação delas exige configuração da API, autenticação e a utilização de créditos. Portanto, o dataset apresenta melhor relação entre a disponibilidade, a simplicidade e o tempo de implementação nesta fase do projeto.
+Em comparação com o dataset real, que depende de medições já realizadas e de sua disponibilidade, o RIPE Atlas permite que o grupo produza novas medições e construa uma base temporal específica para o projeto. Isso facilita a obtenção de dados relacionados às variáveis utilizadas pelo pipeline, X = [latência, perda, jitter], além de possibilitar maior diversidade geográfica.
 
 ## 7. Riscos e limitações
 
 <!-- O que pode dar errado com a opção escolhida, e como isso poderia ser mitigado. -->
-Alguns dos riscos e limitações identificados em relação ao `Dataset real`:
 
-| Risco / Limitação apresentada | Descrição do Risco | Mitigação |
-|-------------------|--------------------|-----------|
-| Dados desatualizados | O modelo é treinado com dados históricos que podem não representar condições futuras da rede| Utilizar versões recentes do dataset e atualizar periodicamente os dados utilizados para treinamento |
-| Falta de controle sobre a coleta | Não há controle sobre como, quando e onde as medições são realizadas | Conhecer a metodologia de coleta e validar se os dados disponíveis atendem às necessidades do pipeline antes do treinamento |
-| Poucos exemplos de falhas | É possível que a grande maioria das medições represente uma rede funcionando normalmente, podendo levar a um desbalanceamento de classes | Verificar a distribuição das classes antes do treinamento e aplicar técnicas adequadas de balanceamento em caso de diferença muito grande | 
+Alguns dos riscos e limitações identificados em relação à `API RIPE Atlas`:
+
+| Risco / Limitação apresentada                 | Descrição do Risco                                                                                                                                                               | Mitigação                                                                                                                                                   |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Consumo de créditos**                       | A criação de medições próprias utiliza créditos, e o consumo pode variar conforme a quantidade de probes, frequência e duração das medições.                                     | Planejar previamente as medições, utilizando uma quantidade adequada de probes, duração e periodicidade, além de acompanhar o saldo de créditos disponível. |
+| **Maior complexidade de implementação**       | A utilização da API exige configuração das medições, integração com os endpoints e tratamento dos dados retornados antes de sua utilização pelo pipeline.                        | Começar com uma medição simples do tipo ping, testar a consulta dos resultados e desenvolver o processamento dos dados de forma incremental.                |
+| **Dependência da disponibilidade das probes** | A coleta depende das probes selecionadas e de sua disponibilidade para realizar as medições, podendo haver diferenças na quantidade ou origem dos dados obtidos.                 | Selecionar probes de diferentes localidades e verificar sua disponibilidade antes da execução das medições.                                                 |
+| **Tempo variável para obtenção dos dados**    | Diferentemente de um dataset já pronto, as medições próprias precisam ser executadas antes que os dados possam ser utilizados, aumentando o tempo necessário para formar a base. | Iniciar as medições com antecedência e utilizar medições públicas do RIPE Atlas durante o desenvolvimento e os testes.                                      |
+| **Necessidade de tratamento dos dados**       | Os resultados retornados pela API precisam ser processados e organizados para obter as métricas necessárias de latência, perda de pacotes e jitter em janelas temporais.         | Criar uma etapa de pré-processamento para extrair as métricas, organizar os registros e gerar as janelas utilizadas pelo preditor.                          |
 
 
 
