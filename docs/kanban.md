@@ -2,6 +2,7 @@
 | --------------- | ------------------------- | ----------- |
 | ⬜ A Fazer      |  |  |
 | 🔵 Em Andamento | - | - |
+| 🔵 Em Andamento | Configurar notebook de coleta e definição dos pares | @Rodrigo |
 | 🟡 Em Revisão   | - | - |
 | ✅ Concluído    | Atualizar memorando de decisão | @Gisele |
 | ✅ Concluído    | Implementação da coleta de dados | @Rodrigo |
