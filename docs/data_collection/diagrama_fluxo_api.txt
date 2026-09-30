@@ -1,0 +1,27 @@
+@startuml
+skinparam defaultTextAlignment center
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor #E3F2FD
+  BorderColor #1565C0
+  ArrowColor #1565C0
+}
+
+title Fluxo de Extração de Dados: API para CSV
+
+start
+
+:Retornar dados da API RIPE Atlas;
+
+:Definir Anchor ID;
+
+:Definir Measurement ID;
+
+:Definir Probe IDs;
+
+:Coletar os dados consolidados;
+
+:Exportar dados em formato CSV;
+
+stop
+@enduml

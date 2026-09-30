@@ -1,0 +1,82 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="co164clwD0BRo5SiI93H">
+    <mxGraphModel dx="2076" dy="586" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-29" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="450" width="620" x="-10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-1" parent="1" style="image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;shadow=0;dashed=0;spacingTop=3;image=img/lib/active_directory/database.svg;" value="api/v2/anchors/" vertex="1">
+          <mxGeometry height="37" width="50" x="100" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 16px;&quot;&gt;&lt;b&gt;Visualização geral dos anchors da API RIPE Atlas&amp;nbsp;&lt;span style=&quot;white-space: nowrap; background-color: rgb(255, 255, 255);&quot;&gt;https://atlas.ripe.net/&lt;/span&gt;&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="620" x="-10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-3" parent="1" style="image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;shadow=0;dashed=0;spacingTop=3;image=img/lib/active_directory/database.svg;" value="api/v2/measurements/" vertex="1">
+          <mxGeometry height="37" width="50" x="100" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-5" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b style=&quot;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Endpoint&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="100" x="75" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-6" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;&lt;b&gt;Informações e uso no projeto&lt;/b&gt;&lt;/span&gt;" vertex="1">
+          <mxGeometry height="30" width="220" x="230" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-13" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 13px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Retorna informações sobre todos os anchors da API, podendo ser colocado um filtro na pesquisa para filtrar por país. É utilizado no projeto como primeira fonte, na qual se deseja encontrar os &quot;possíveis candidatos&quot; a ser o IP destino de uma ou mais medições&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="360" x="240" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-14" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 13px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Retorna todas as medidas registradas na base de dados da API. Será utilizada no projeto para poder se definir as medidas que possuem como destino o anchor (ou os anchor ids) escolhidos no endpoint anterior (encontrar medidas registradas na qual o target_ip é igual ao anchor id escolhido)&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="360" x="240" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-16" parent="1" style="image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;shadow=0;dashed=0;spacingTop=3;image=img/lib/active_directory/database.svg;" value="api/v2/measurements/{msm}/results" vertex="1">
+          <mxGeometry height="37" width="50" x="100" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-17" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 13px;&quot;&gt;Retorna todos os resultados individuais de ping baseado em uma medição pelo id (msm) especificado. Usado para fazer o retorno das métricas, e posteriormente permitindo filtragem pelos probe ids desejados (somente retornar resultados que sejam do probe id x, y ou z)&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="360" x="240" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-20" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="190" as="sourcePoint" />
+            <mxPoint x="599.9999999999998" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-22" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="280" as="sourcePoint" />
+            <mxPoint x="599.9999999999998" y="279.52" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-23" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="370" as="sourcePoint" />
+            <mxPoint x="599.9999999999998" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-25" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="229.99696969696953" y="70" as="sourcePoint" />
+            <mxPoint x="230" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-26" parent="1" style="image;aspect=fixed;perimeter=ellipsePerimeter;html=1;align=center;shadow=0;dashed=0;spacingTop=3;image=img/lib/active_directory/database.svg;" value="api/v2/probes/probe_id/" vertex="1">
+          <mxGeometry height="37" width="50" x="100" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-27" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 13px;&quot;&gt;Retorna informações para um probe id específico. Será usado no projeto para determinar a localização geográfica (país) de origem e destinho das medidas obtidas no endpoint anterior&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="360" x="240" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-28" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="460" as="sourcePoint" />
+            <mxPoint x="599.9999999999998" y="460" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="BWiKtT-6Y9iL_ukS4KQI-30" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint y="69.31" as="sourcePoint" />
+            <mxPoint x="599.9999999999998" y="69.31" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
