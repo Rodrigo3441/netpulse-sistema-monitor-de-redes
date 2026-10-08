@@ -1,2 +1,8 @@
 # template that will be used soon
 *.bkp
+
+# cache files
+cache/
+
+# python compiled files
+*__pycache__/
