@@ -2,8 +2,8 @@
 | --------------- | ------------------------- | ----------- |
 | ⬜ A Fazer      |  |  |
 | ⬜ A Fazer      | Atualizar dicionário de dados do dataset quando o mesmo estiver pronto | @Gisele |
-| 🔵 Em Andamento | Construir coleta de dados do projeto em python | @Rodrigo |
-| 🟡 Em Revisão   | - | - |
+| 🔵 Em Andamento |  |  |
+| 🟡 Em Revisão   | Construir coleta de dados do projeto em python | @Rodrigo |
 | ✅ Concluído    | Atualizar memorando de decisão | @Gisele |
 | ✅ Concluído    | Implementação da coleta de dados | @Rodrigo |
 | ✅ Concluído    | Justificar escolhas da equipe  | @Eduardo |
