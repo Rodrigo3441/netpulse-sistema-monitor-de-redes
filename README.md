@@ -19,3 +19,32 @@ Esse projeto possui conexão com as seguintes disciplinas:
 ## 📑 Metodologia:
 
 A metodologia adotada para esse projeto será a SCRUM
+
+## Estrutura do Projeto
+
+``` bash
+netpulse-sistema-monitor-de-redes/
+├── archive/
+├── cache/
+├── docs/
+├── notebooks/
+├── raw/
+├── src/
+│   └── data_collection/
+│       ├── dataset/
+│       │   ├── builder.py
+│       │   └── pairs_metadata.py
+│       ├── extraction/
+│       │   ├── anchors.py
+│       │   ├── cache.py
+│       │   ├── config.py
+│       │   ├── measurements.py
+│       │   ├── probes.py
+│       │   └── results.py
+│       ├── build_dataset.py
+│       └── create_cache.py
+├── .gitignore
+├── LICENSE
+├── main.py
+└── README.md
+```
