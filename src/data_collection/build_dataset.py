@@ -56,7 +56,7 @@ def execute_dataset_creation():
 
     export_dataset(
         training_df,
-        OUTPUT_DIR / 'training.csv'
+        OUTPUT_DIR / 'period_a.csv'
     )
 
     # Dataset de validação
@@ -69,5 +69,5 @@ def execute_dataset_creation():
 
     export_dataset(
         validation_df,
-        OUTPUT_DIR / 'validation.csv'
+        OUTPUT_DIR / 'period_b.csv'
     )
