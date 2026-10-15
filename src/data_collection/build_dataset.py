@@ -9,7 +9,7 @@ from src.data_collection.dataset.pairs_metadata import (
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 CACHE_DIR = PROJECT_ROOT / 'cache'
-OUTPUT_DIR = PROJECT_ROOT / 'raw'
+OUTPUT_DIR = PROJECT_ROOT / 'data' / 'raw'
 
 
 def execute_dataset_creation():
