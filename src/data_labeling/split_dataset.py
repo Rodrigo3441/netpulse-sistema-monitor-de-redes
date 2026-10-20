@@ -20,46 +20,41 @@ OUTPUT_PATH = (
     / "period_b_split.csv"
 )
 
-FLOW_COLUMNS = ["msm_id", "probe_id"]
-TIME_COLUMN = "timestamp"
+# Identifica o par origem-destino.
+PAIR_COLUMNS = ["anchor_id", "probe_id"]
 
-TRAIN_RATIO = 0.50
-VALIDATION_RATIO = 0.20
+RANDOM_SEED = 42
+
+TRAIN_PAIRS = 20
+VALIDATION_PAIRS = 5
+TEST_PAIRS = 5
 
 
-def assign_split(flow):
-    """Divide um fluxo ordenado em treino, validação e teste."""
-    flow = flow.sort_values(TIME_COLUMN).copy()
+def assign_pairs(pairs):
+    """Atribui cada par completo a um único conjunto."""
+    shuffled = pairs.sample(
+        frac=1,
+        random_state=RANDOM_SEED,
+    ).reset_index(drop=True)
 
-    total = len(flow)
+    shuffled["split"] = "test"
 
-    train_end = int(total * TRAIN_RATIO)
-    validation_end = int(
-        total * (TRAIN_RATIO + VALIDATION_RATIO)
-    )
+    shuffled.loc[:TRAIN_PAIRS - 1, "split"] = "train"
 
-    flow["split"] = "test"
-
-    flow.iloc[
-        :train_end,
-        flow.columns.get_loc("split"),
-    ] = "train"
-
-    flow.iloc[
-        train_end:validation_end,
-        flow.columns.get_loc("split"),
+    shuffled.loc[
+        TRAIN_PAIRS:TRAIN_PAIRS + VALIDATION_PAIRS - 1,
+        "split",
     ] = "validation"
 
-    return flow
+    return shuffled
 
 
 def main():
     df = pd.read_csv(INPUT_PATH)
 
     required_columns = set(
-        FLOW_COLUMNS + [TIME_COLUMN, "classe"]
+        PAIR_COLUMNS + ["msm_id", "timestamp", "classe"]
     )
-
     missing_columns = required_columns - set(df.columns)
 
     if missing_columns:
@@ -67,93 +62,98 @@ def main():
             f"Colunas ausentes no CSV: {sorted(missing_columns)}"
         )
 
-    # Verifica se a identificação do fluxo e o timestamp
-    # estão preenchidos.
-    if df[FLOW_COLUMNS + [TIME_COLUMN]].isna().any().any():
+    if df[PAIR_COLUMNS].isna().any().any():
         raise ValueError(
-            "Existem valores ausentes em msm_id, probe_id "
-            "ou timestamp."
+            "Existem pares com anchor_id ou probe_id ausentes."
         )
 
-    # Cada fluxo deve ter no máximo uma medição por timestamp.
-    duplicate_mask = df.duplicated(
-        subset=FLOW_COLUMNS + [TIME_COLUMN],
-        keep=False,
-    )
-
-    if duplicate_mask.any():
-        raise ValueError(
-            "Existem timestamps repetidos dentro de um fluxo. "
-            "Inspecione os dados antes de dividir."
-        )
+    if df["timestamp"].isna().any():
+        raise ValueError("Existem timestamps ausentes.")
 
     original_count = len(df)
 
-    # Processa cada fluxo separadamente para preservar
-    # a estrutura das colunas.
-    parts = []
+    # Obtém os pares distintos, não as medições individuais.
+    pairs = df[PAIR_COLUMNS].drop_duplicates().reset_index(drop=True)
 
-    for _, flow in df.groupby(FLOW_COLUMNS, sort=False):
-        parts.append(assign_split(flow))
+    expected_pairs = TRAIN_PAIRS + VALIDATION_PAIRS + TEST_PAIRS
 
-    if not parts:
-        raise ValueError("O CSV não contém registros.")
+    if len(pairs) != expected_pairs:
+        raise ValueError(
+            f"Esperados {expected_pairs} pares, "
+            f"mas foram encontrados {len(pairs)}."
+        )
 
-    split_df = pd.concat(parts, ignore_index=True)
+    # Cada par é atribuído a exatamente um conjunto.
+    pair_assignments = assign_pairs(pairs)
 
-    # Verificações de integridade.
+    # Associa a atribuição a todas as medições do par.
+    split_df = df.merge(
+        pair_assignments,
+        on=PAIR_COLUMNS,
+        how="left",
+        validate="many_to_one",
+    )
+
     if len(split_df) != original_count:
         raise RuntimeError(
-            "A quantidade de registros mudou durante a divisão."
+            "A quantidade de medições mudou durante a divisão."
         )
 
     if split_df["split"].isna().any():
         raise RuntimeError(
-            "Existem registros sem conjunto atribuído."
+            "Existem medições sem conjunto atribuído."
         )
 
-    expected_splits = {"train", "validation", "test"}
+    # Verifica a quantidade de pares em cada conjunto.
+    pairs_per_split = (
+        pair_assignments.groupby("split")
+        .size()
+        .to_dict()
+    )
 
-    if set(split_df["split"].unique()) != expected_splits:
-        raise RuntimeError(
-            "A divisão não gerou os três conjuntos esperados."
-        )
-
-    # Confirma que os conjuntos seguem a ordem cronológica
-    # dentro de cada fluxo.
-    split_order = {
-        "train": 0,
-        "validation": 1,
-        "test": 2,
+    expected_counts = {
+        "train": TRAIN_PAIRS,
+        "validation": VALIDATION_PAIRS,
+        "test": TEST_PAIRS,
     }
 
-    for _, flow in split_df.groupby(FLOW_COLUMNS):
-        flow = flow.sort_values(TIME_COLUMN)
-        order = flow["split"].map(split_order)
+    if pairs_per_split != expected_counts:
+        raise RuntimeError(
+            f"Distribuição inesperada dos pares: {pairs_per_split}"
+        )
 
-        if not order.is_monotonic_increasing:
-            raise RuntimeError(
-                "A ordem temporal dos conjuntos está inconsistente."
-            )
+    # Verifica que nenhum par aparece em mais de um conjunto.
+    splits_per_pair = (
+        split_df.groupby(PAIR_COLUMNS)["split"]
+        .nunique()
+    )
 
-    # Salva o resultado sem modificar o arquivo original.
+    if (splits_per_pair > 1).any():
+        raise RuntimeError(
+            "Um ou mais pares aparecem em múltiplos conjuntos."
+        )
+
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     split_df.to_csv(OUTPUT_PATH, index=False)
 
-    # Relatório da divisão.
     print(f"Arquivo de entrada: {INPUT_PATH}")
     print(f"Arquivo de saída: {OUTPUT_PATH}")
-    print(f"Total de registros: {len(split_df)}")
+    print(f"Total de medições: {len(split_df)}")
+    print(f"Total de pares: {len(pairs)}")
+
+    print("\n=== Quantidade de pares por conjunto ===")
     print(
-        "Total de fluxos:",
-        split_df.groupby(FLOW_COLUMNS).ngroups,
+        pair_assignments["split"]
+        .value_counts()
+        .reindex(["train", "validation", "test"])
+        .to_string()
     )
 
-    print("\n=== Quantidade por conjunto ===")
+    print("\n=== Quantidade de medições por conjunto ===")
     print(
         split_df["split"]
         .value_counts()
-        .reindex(["train", "validation", "test"], fill_value=0)
+        .reindex(["train", "validation", "test"])
         .to_string()
     )
 
@@ -166,16 +166,15 @@ def main():
         ).to_string()
     )
 
-    print("\n=== Verificação dos percentuais ===")
+    print("\n=== Pares atribuídos ===")
     print(
-        (
-            split_df["split"].value_counts(normalize=True)
-            .mul(100)
-            .reindex(["train", "validation", "test"], fill_value=0)
-        ).round(2).to_string()
+        pair_assignments.sort_values(
+            ["split", "anchor_id", "probe_id"]
+        ).to_string(index=False)
     )
 
-    print("\nDivisão concluída e verificações aprovadas.")
+    print("\nDivisão por pares concluída.")
+    print("Verificações de integridade aprovadas.")
 
 
 if __name__ == "__main__":
