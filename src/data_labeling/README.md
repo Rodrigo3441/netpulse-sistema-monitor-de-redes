@@ -1,4 +1,4 @@
-# Data Labeling
+# Rotulação
 
 Esta pasta contém os scripts responsáveis pela preparação, cálculo de métricas e rotulagem dos dados do projeto NetPulse.
 
