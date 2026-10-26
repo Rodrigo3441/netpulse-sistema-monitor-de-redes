@@ -1,0 +1,6 @@
+
+pandas==3.0.3
+requests==2.34.2
+numpy==2.5.1
+scikit-learn==1.9.1
+joblib==1.6.0
