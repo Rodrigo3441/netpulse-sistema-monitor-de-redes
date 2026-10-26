@@ -44,3 +44,13 @@ Os arquivos `period_a.csv` e `period_b.csv` possuem as mesmas 17 colunas.
 | `type` | Tipo de medição, como `ping`. |
 | `packets` | Quantidade de pacotes configurados por medição. |
 | `interval` | Intervalo configurado entre as medições, em segundos. |
+
+### Metadados - Classificação de Distância Geográfica 
+
+A distância geográfica entre cada probe de origem e a âncora de destino foi calculada utilizando a fórmula de Haversine, que estima a distância em linha reta entre duas coordenadas geográficas (latitude e longitude), em quilômetros.
+
+As distâncias foram classificadas em três categorias:
+
+- **Curta:** distância inferior a 1.000 km.
+- **Média:** distância entre 1.000 km e 5.000 km, incluindo os limites.
+- **Longa:** distância superior a 5.000 km.
