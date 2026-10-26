@@ -155,5 +155,3 @@ def main():
     print(f'Exclusões salvas em: {EXCLUDED_PATH}')
 
 
-if __name__ == '__main__':
-    main()

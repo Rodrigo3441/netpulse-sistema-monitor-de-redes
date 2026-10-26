@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import numpy as np
 import pandas as pd
 
 
@@ -11,20 +11,34 @@ OUTPUT_PATH = INTERIM_DIR / "period_b_labeled.csv"
 
 FLOW_COLUMNS = ["msm_id", "probe_id"]
 
+METADATA_PATH = (
+    PROJECT_ROOT
+    / "data"
+    / "raw"
+    / "pairs_metadata.csv"
+)
+
 
 def load_data():
-    """Carrega as métricas calculadas do Período B."""
+    """Carrega as métricas e incorpora a distância geográfica."""
     if not INPUT_PATH.exists():
         raise FileNotFoundError(
             f"Arquivo não encontrado: {INPUT_PATH}\n"
             "Execute calculate_metrics.py primeiro."
         )
 
+    if not METADATA_PATH.exists():
+        raise FileNotFoundError(
+            f"Arquivo de metadados não encontrado: {METADATA_PATH}"
+        )
+
     df = pd.read_csv(INPUT_PATH)
+    metadata = pd.read_csv(METADATA_PATH)
 
     required_columns = {
         "msm_id",
         "probe_id",
+        "anchor_id",
         "avg",
         "perda_pct",
         "z_robusto",
@@ -39,10 +53,81 @@ def load_data():
 
     if missing:
         raise ValueError(
-            f"Colunas obrigatórias ausentes: {sorted(missing)}"
+            f"Colunas obrigatórias ausentes no dataset: {sorted(missing)}"
+        )
+
+    metadata_columns = {
+        "msm_id",
+        "src_probe_id",
+        "dst_anchor_id",
+        "distancia",
+    }
+
+    missing_metadata = metadata_columns - set(metadata.columns)
+
+    if missing_metadata:
+        raise ValueError(
+            "Colunas obrigatórias ausentes nos metadados: "
+            f"{sorted(missing_metadata)}"
+        )
+
+    # Seleciona apenas as colunas necessárias para a junção.
+    metadata = metadata[
+        ["msm_id", "src_probe_id", "dst_anchor_id", "distancia"]
+    ].copy()
+
+    # Renomeia as chaves para corresponder ao dataset de métricas.
+    metadata = metadata.rename(
+        columns={
+            "src_probe_id": "probe_id",
+            "dst_anchor_id": "anchor_id",
+        }
+    )
+
+    join_columns = ["msm_id", "probe_id", "anchor_id"]
+
+    # Cada combinação deve identificar um único registro de metadados.
+    if metadata.duplicated(join_columns).any():
+        raise ValueError(
+            "Existem combinações duplicadas de msm_id, probe_id "
+            "e anchor_id nos metadados."
+        )
+
+    original_count = len(df)
+
+    # Incorpora a distância sem multiplicar as medições.
+    df = df.merge(
+        metadata,
+        on=join_columns,
+        how="left",
+        validate="many_to_one",
+        indicator=True,
+    )
+
+    unmatched = df["_merge"] != "both"
+
+    if unmatched.any():
+        examples = (
+            df.loc[unmatched, join_columns]
+            .drop_duplicates()
+            .head(10)
+            .to_dict("records")
+        )
+
+        raise ValueError(
+            f"{unmatched.sum()} medições não possuem metadados "
+            f"correspondentes. Exemplos: {examples}"
+        )
+
+    df = df.drop(columns="_merge")
+
+    if len(df) != original_count:
+        raise RuntimeError(
+            "A quantidade de medições mudou durante a junção."
         )
 
     return df
+
 
 
 def label_measurement(row):
@@ -110,6 +195,7 @@ def main():
         resultados.tolist(),
         index=df.index,
     )
+
 
     df.to_csv(OUTPUT_PATH, index=False)
 
@@ -182,7 +268,3 @@ def main():
 
         linha = candidatos.iloc[0]
         print(linha[colunas_exemplo].to_string())
-
-
-if __name__ == "__main__":
-    main()

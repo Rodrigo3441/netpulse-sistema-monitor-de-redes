@@ -279,7 +279,3 @@ def main():
     print(f'Fluxos processados: {df[FLOW_COLUMNS].drop_duplicates().shape[0]}')
     print(f'Timeouts: {df["timeout_atual"].sum()}')
     print(f'Arquivo salvo em: {OUTPUT_PATH}')
-
-
-if __name__ == '__main__':
-    main()
