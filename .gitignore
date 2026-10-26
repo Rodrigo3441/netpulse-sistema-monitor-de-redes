@@ -6,3 +6,6 @@ cache/
 
 # python compiled files
 *__pycache__/
+
+# models folder
+*models/
