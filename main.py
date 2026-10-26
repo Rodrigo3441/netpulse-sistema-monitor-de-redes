@@ -1,6 +1,10 @@
-from src.data_collection.create_cache import execute_data_collection
-from src.data_collection.build_dataset import execute_dataset_creation
+from src import (
+    etl_data_collection,
+    etl_data_labeling,
+    etl_data_model
+)
 
 if __name__ == "__main__":
-    execute_data_collection()
-    execute_dataset_creation()
+    etl_data_collection.execute()
+    etl_data_labeling.execute()
+    etl_data_model.execute()
