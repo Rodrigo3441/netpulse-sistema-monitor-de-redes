@@ -1,4 +1,6 @@
+
 import json
+import math
 from pathlib import Path
 
 import pandas as pd
@@ -8,7 +10,7 @@ from src.data_collection.extraction.config import ANCHORS, MEASUREMENT_PROBES
 
 # Construção do índice de pares
 def build_pair_index():
-    """Cria a lista de combinações entre probes de origem e anchors de destino."""
+    """Cria as combinações entre probes de origem e anchors de destino."""
     pairs = []
 
     for anchor_id, msm_id in ANCHORS.items():
@@ -60,9 +62,69 @@ def extract_anchor_metadata(anchor):
     }
 
 
+# Cálculo da distância geográfica
+def calculate_distance_km(src_lat, src_lon, dst_lat, dst_lon):
+    """Calcula a distância aproximada entre dois pontos usando Haversine."""
+    try:
+        src_lat, src_lon, dst_lat, dst_lon = map(
+            float, (src_lat, src_lon, dst_lat, dst_lon)
+        )
+    except (TypeError, ValueError):
+        return None
+
+    coordinates = (src_lat, src_lon, dst_lat, dst_lon)
+
+    if not all(math.isfinite(value) for value in coordinates):
+        return None
+
+    if not (
+        -90 <= src_lat <= 90
+        and -90 <= dst_lat <= 90
+        and -180 <= src_lon <= 180
+        and -180 <= dst_lon <= 180
+    ):
+        return None
+
+    # Conversão de graus para radianos
+    src_lat, src_lon, dst_lat, dst_lon = map(
+        math.radians, coordinates
+    )
+
+    # Fórmula de Haversine
+    delta_lat = dst_lat - src_lat
+    delta_lon = dst_lon - src_lon
+
+    a = (
+        math.sin(delta_lat / 2) ** 2
+        + math.cos(src_lat)
+        * math.cos(dst_lat)
+        * math.sin(delta_lon / 2) ** 2
+    )
+
+    # Evita pequenas imprecisões numéricas
+    a = min(1.0, max(0.0, a))
+
+    earth_radius_km = 6371.0
+
+    return 2 * earth_radius_km * math.asin(math.sqrt(a))
+
+
+def classify_distance(distance_km):
+    """Classifica a rota conforme a distância geográfica em quilômetros."""
+    if distance_km is None:
+        return None
+
+    if distance_km < 1000:
+        return 'curta'
+    elif distance_km <= 5000:
+        return 'media'
+    else:
+        return 'longa'
+
+
 # Construção dos metadados dos pares
 def build_pairs_metadata(probes_dir, anchors_dir):
-    """Combina os pares configurados com os metadados de probes e anchors."""
+    """Combina pares, metadados geográficos e classificação da distância."""
     pairs_df = build_pair_index()
     metadata = []
 
@@ -81,6 +143,21 @@ def build_pairs_metadata(probes_dir, anchors_dir):
             **extract_probe_metadata(probe),
             **extract_anchor_metadata(anchor)
         }
+
+        distance_km = calculate_distance_km(
+            pair_metadata['src_latitude'],
+            pair_metadata['src_longitude'],
+            pair_metadata['dst_latitude'],
+            pair_metadata['dst_longitude']
+        )
+
+        pair_metadata['distancia_km'] = (
+            round(distance_km, 2)
+            if distance_km is not None
+            else None
+        )
+
+        pair_metadata['distancia'] = classify_distance(distance_km)
 
         metadata.append(pair_metadata)
 
