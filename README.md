@@ -29,11 +29,51 @@ O objetivo é desenvolver um sistema de monitoramento e predição de falhas em 
 - Classificar condições futuras dos fluxos em OK, RISCO e FALHA.
 
 
-## Arquitetura do Sistema
+## 🏗 Arquitetura do Sistema
 
-## Tecnologias utilizadas
+![Diagrama arquitetura](docs/pipeline_architecture/arquitetura_pipeline.png)
 
+O diagrama apresenta o fluxo completo do projeto, desde a coleta de medições da API do RIPE Atlas até o treinamento dos modelos de Machine Learning. O processo inclui a construção do baseline, a rotulagem e preparação dos dados, a divisão dos conjuntos e o treinamento dos algoritmos Decision Tree e Random Forest. Por fim, os modelos treinados são salvos em arquivos `.joblib`, permitindo sua reutilização para realizar previsões de possíveis falhas na rede.
+
+## ⚙ Tecnologias utilizadas
+
+| Tecnologia | Versão | Finalidade |
+|---|---|---|
+| [Python](https://www.python.org/) | — | Linguagem utilizada no desenvolvimento do pipeline e dos modelos de Machine Learning. |
+| [Pandas](https://pandas.pydata.org/) | 3.0.3 | Manipulação, organização e análise dos dados em tabelas e arquivos CSV. |
+| [Requests](https://requests.readthedocs.io/) | 2.34.2 | Realização de requisições HTTP para obtenção de dados da API do RIPE Atlas. |
+| [NumPy](https://numpy.org/) | 2.5.1 | Operações numéricas e suporte ao processamento de dados. |
+| [Scikit-learn](https://scikit-learn.org/) | 1.9.1 | Treinamento e avaliação dos modelos de Machine Learning Decision Tree e Random Forest. |
+| [Joblib](https://joblib.readthedocs.io/) | 1.6.0 | Salvamento e carregamento dos modelos treinados em arquivos `.joblib`. |
+
+As versões das bibliotecas estão fixadas para facilitar a reprodução do ambiente de desenvolvimento.
 ## Pipeline de dados
+
+## Fluxo do Pipeline de Dados
+
+### 1. Coleta de dados
+As medições de rede são coletadas por meio da API do RIPE Atlas, utilizando probes de origem e anchors de destino definidos no projeto.
+
+### 2. Geração dos datasets
+Os dados coletados são organizados em dois conjuntos CSV, correspondentes a períodos consecutivos de sete dias: **Período A** e **Período B**.
+
+### 3. Construção do baseline
+O Período A é utilizado para calcular métricas históricas de referência para cada fluxo de rede, estabelecendo os parâmetros que serão utilizados na classificação das medições posteriores.
+
+### 4. Rotulagem dos dados
+As medições do Período B são classificadas com base no baseline histórico, recebendo os rótulos **OK**, **RISCO** ou **FALHA**, conforme as condições observadas na rede.
+
+### 5. Deslocamento temporal dos rótulos
+Os rótulos são deslocados temporalmente dentro de cada fluxo para que os modelos aprendam a prever a condição futura da rede a partir das medições disponíveis no momento atual.
+
+### 6. Divisão do dataset
+O dataset preparado é dividido em conjuntos de treinamento, validação e teste, mantendo os fluxos de origem e destino separados entre os conjuntos para reduzir o risco de vazamento de dados.
+
+### 7. Treinamento dos modelos
+Os dados são utilizados para treinar dois algoritmos de Machine Learning: **Decision Tree** e **Random Forest**, com o objetivo de prever possíveis condições futuras da rede.
+
+### 8. Salvamento dos modelos
+Após o treinamento, os modelos são salvos em arquivos `.joblib`, permitindo que sejam carregados posteriormente para realizar previsões sem a necessidade de treinar novamente.
 
 ## 💾 Modelos e resultados
 
