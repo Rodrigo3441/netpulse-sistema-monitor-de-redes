@@ -1,0 +1,1413 @@
+
+from pathlib import Path
+import json
+import html
+
+
+# ============================================================
+# Configuração dos caminhos
+# ============================================================
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+MODELS_DIR = PROJECT_ROOT / "data" / "models"
+OUTPUT_FILE = Path(__file__).resolve().parent / "index.html"
+
+DECISION_TREE_FILE = MODELS_DIR / "metadados_arvore_decisao.json"
+RANDOM_FOREST_FILE = MODELS_DIR / "metadados_random_forest.json"
+
+
+# ============================================================
+# Leitura e validação dos metadados
+# ============================================================
+
+def load_json(path: Path) -> dict:
+    """Lê um arquivo JSON e verifica se ele contém um objeto."""
+
+    if not path.is_file():
+        raise FileNotFoundError(
+            f"Arquivo não encontrado: {path}"
+        )
+
+    with path.open("r", encoding="utf-8") as file:
+        data = json.load(file)
+
+    if not isinstance(data, dict):
+        raise ValueError(
+            f"O arquivo precisa conter um objeto JSON: {path.name}"
+        )
+
+    return data
+
+
+def validate_metadata(data: dict, expected_family: str, path: Path) -> None:
+    """Verifica se os metadados contêm os campos necessários."""
+
+    if data.get("familia") != expected_family:
+        raise ValueError(
+            f"Família inválida em {path.name}. "
+            f"Esperado: {expected_family!r}; "
+            f"recebido: {data.get('familia')!r}."
+        )
+
+    required_fields = [
+        "features",
+        "best_params",
+        "macro_f1_validacao",
+        "macro_f1_teste",
+        "recall_falha_teste",
+        "classification_report",
+        "confusion_matrix",
+        "confusion_matrix_labels",
+        "feature_importances",
+    ]
+
+    missing = [
+        field for field in required_fields
+        if field not in data
+    ]
+
+    if missing:
+        raise ValueError(
+            f"Campos ausentes em {path.name}: "
+            + ", ".join(missing)
+        )
+
+    report = data["classification_report"]
+
+    for class_name in ("OK", "RISCO", "FALHA"):
+        if class_name not in report:
+            raise ValueError(
+                f"A classe {class_name!r} não foi encontrada "
+                f"em classification_report de {path.name}."
+            )
+
+    matrix = data["confusion_matrix"]
+    labels = data["confusion_matrix_labels"]
+
+    if (
+        not isinstance(matrix, list)
+        or len(matrix) != len(labels)
+        or any(
+            not isinstance(row, list) or len(row) != len(labels)
+            for row in matrix
+        )
+    ):
+        raise ValueError(
+            f"Matriz de confusão inválida em {path.name}."
+        )
+
+
+# ============================================================
+# Geração do HTML
+# ============================================================
+
+def generate_html(arvore: dict, random_forest: dict) -> str:
+    """Gera o painel HTML usando os metadados dos dois modelos."""
+
+    models = {
+        "arvore": arvore,
+        "random_forest": random_forest,
+    }
+
+    # Escapa caracteres que poderiam encerrar a tag script.
+    models_json = json.dumps(
+        models,
+        ensure_ascii=False,
+        allow_nan=False,
+        separators=(",", ":"),
+    )
+
+    models_json = (
+        models_json
+        .replace("&", "\\u0026")
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+    )
+
+    template = r"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Comparativo dos modelos de Machine Learning do projeto NetPulse.">
+    <title>NetPulse | Comparativo de modelos</title>
+
+    <style>
+        :root {
+            color-scheme: light;
+            --background: #f5f7fb;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --border: #e2e8f0;
+            --text: #172033;
+            --muted: #64748b;
+            --primary: #2563eb;
+            --primary-soft: #eff6ff;
+            --green: #15803d;
+            --green-soft: #f0fdf4;
+            --orange: #c2410c;
+            --orange-soft: #fff7ed;
+            --red: #b91c1c;
+            --red-soft: #fef2f2;
+            --radius: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .container {
+            width: min(1200px, calc(100% - 36px));
+            margin: 0 auto;
+        }
+
+        header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-inner {
+            min-height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 16px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 23px;
+            font-weight: 800;
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-subtitle {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .header-tag {
+            padding: 6px 10px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        main {
+            padding: 34px 0 48px;
+        }
+
+        .page-heading {
+            margin-bottom: 26px;
+        }
+
+        .eyebrow {
+            margin-bottom: 5px;
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(25px, 4vw, 34px);
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .page-description {
+            max-width: 760px;
+            margin: 12px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: -0.3px;
+        }
+
+        h3 {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .section-description {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .kpi-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .two-columns {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .card {
+            min-width: 0;
+            padding: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 2px 5px rgb(15 23 42 / 3%);
+        }
+
+        .kpi-label {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .kpi-values {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .kpi-model {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .kpi-number {
+            margin-top: 2px;
+            font-size: clamp(21px, 3vw, 29px);
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.3;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .kpi-number.winner {
+            color: var(--green);
+        }
+
+        .kpi-delta {
+            margin-top: 12px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .model-card {
+            border-top: 3px solid var(--primary);
+        }
+
+        .model-card.rf {
+            border-top-color: #7c3aed;
+        }
+
+        .model-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .model-name {
+            font-size: 16px;
+            font-weight: 800;
+        }
+
+        .model-type {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .pill {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .rf .pill {
+            background: #f5f3ff;
+            color: #6d28d9;
+        }
+
+        .parameter-list {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 10px;
+            margin: 0;
+        }
+
+        .parameter {
+            min-width: 0;
+            padding: 11px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+        }
+
+        .parameter dt {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .parameter dd {
+            margin: 4px 0 0;
+            overflow-wrap: anywhere;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .parameter-wide {
+            grid-column: 1 / -1;
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        th, td {
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        th {
+            background: var(--surface-alt);
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #fafcff;
+        }
+
+        .class-badge {
+            display: inline-block;
+            min-width: 60px;
+            padding: 4px 7px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .class-ok {
+            background: var(--green-soft);
+            color: var(--green);
+        }
+
+        .class-risco {
+            background: var(--orange-soft);
+            color: var(--orange);
+        }
+
+        .class-falha {
+            background: var(--red-soft);
+            color: var(--red);
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .matrix-subtitle {
+            margin: 3px 0 15px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .matrix {
+            width: 100%;
+            table-layout: fixed;
+            font-size: 12px;
+        }
+
+        .matrix th, .matrix td {
+            padding: 10px 5px;
+            text-align: center;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .matrix th {
+            font-size: 10px;
+        }
+
+        .matrix td {
+            border: 2px solid white;
+            border-radius: 5px;
+            font-weight: 700;
+        }
+
+        .matrix td:first-child {
+            background: var(--surface-alt);
+            border-color: var(--border);
+        }
+
+        .feature-chart {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-row {
+            display: grid;
+            grid-template-columns: minmax(100px, 1fr) minmax(80px, 2fr) 55px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .feature-name {
+            overflow-wrap: anywhere;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .bar-track {
+            height: 12px;
+            overflow: hidden;
+            background: #edf2f7;
+            border-radius: 999px;
+        }
+
+        .bar {
+            height: 100%;
+            min-width: 0;
+            border-radius: 999px;
+            background: var(--primary);
+        }
+
+        .bar.rf-bar {
+            background: #7c3aed;
+        }
+
+        .feature-value {
+            text-align: right;
+            color: var(--muted);
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 14px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .legend-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 3px;
+            background: var(--primary);
+        }
+
+        .legend-dot.rf-dot {
+            background: #7c3aed;
+        }
+
+        .summary-list {
+            display: grid;
+            gap: 12px;
+            padding: 0;
+            margin: 18px 0 0;
+            list-style: none;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+        }
+
+        .summary-icon {
+            display: grid;
+            flex: 0 0 25px;
+            place-items: center;
+            width: 25px;
+            height: 25px;
+            border-radius: 7px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-weight: 800;
+        }
+
+        .summary-text {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .summary-text strong {
+            color: var(--text);
+        }
+
+        .note {
+            margin-top: 14px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: var(--surface-alt);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .feature-empty {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        footer {
+            padding: 22px 0;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        @media (max-width: 760px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .two-columns, .matrix-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header-tag {
+                display: none;
+            }
+
+            .card {
+                padding: 16px;
+            }
+
+            .feature-row {
+                grid-template-columns: minmax(85px, 1fr) minmax(55px, 1.5fr) 45px;
+                gap: 8px;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .card {
+                box-shadow: none;
+                break-inside: avoid;
+            }
+
+            .section {
+                break-inside: avoid;
+            }
+
+            header, footer {
+                background: white;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<header>
+    <div class="container header-inner">
+        <div class="brand">
+            <div class="brand-icon" aria-hidden="true">N</div>
+            <div>
+                <div class="brand-name">NetPulse</div>
+                <div class="brand-subtitle">Machine Learning · Monitoramento de redes</div>
+            </div>
+        </div>
+        <div class="header-tag">Painel local · Dados dos modelos</div>
+    </div>
+</header>
+
+<main class="container">
+    <section class="page-heading">
+        <div class="eyebrow">Análise de desempenho</div>
+        <h1>Comparativo de modelos</h1>
+        <p class="page-description">
+            Comparação entre Árvore de Decisão e Random Forest com base
+            nos metadados gerados durante a avaliação dos modelos.
+            Os resultados abaixo são incorporados ao HTML pelo Python.
+        </p>
+    </section>
+
+    <section>
+        <div class="section-heading">
+            <div>
+                <h2>Indicadores principais</h2>
+                <p class="section-description">
+                    Métricas calculadas sobre o conjunto de teste, exceto onde indicado.
+                </p>
+            </div>
+        </div>
+        <div class="grid kpi-grid" id="kpi-grid"></div>
+    </section>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Configuração dos modelos</h2>
+                <p class="section-description">
+                    Melhores hiperparâmetros encontrados durante a busca.
+                </p>
+            </div>
+        </div>
+        <div class="grid two-columns" id="model-cards"></div>
+    </section>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Métricas por classe</h2>
+                <p class="section-description">
+                    Precisão, recall, F1-score e quantidade de amostras por classe.
+                </p>
+            </div>
+        </div>
+        <div class="grid two-columns">
+            <article class="card">
+                <h3>Árvore de Decisão</h3>
+                <div class="table-wrap" id="report-tree"></div>
+            </article>
+            <article class="card">
+                <h3>Random Forest</h3>
+                <div class="table-wrap" id="report-rf"></div>
+            </article>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Matrizes de confusão</h2>
+                <p class="section-description">
+                    Linhas representam as classes reais; colunas representam as classes previstas.
+                </p>
+            </div>
+        </div>
+        <div class="matrix-grid">
+            <article class="card">
+                <h3>Árvore de Decisão</h3>
+                <p class="matrix-subtitle">Valores absolutos por classe</p>
+                <div class="table-wrap" id="matrix-tree"></div>
+            </article>
+            <article class="card">
+                <h3>Random Forest</h3>
+                <p class="matrix-subtitle">Valores absolutos por classe</p>
+                <div class="table-wrap" id="matrix-rf"></div>
+            </article>
+        </div>
+        <div class="note">
+            A diagonal principal representa as classificações corretas.
+            Os valores fora da diagonal representam erros de classificação.
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Importância das variáveis</h2>
+                <p class="section-description">
+                    Importâncias fornecidas pelos modelos. Os valores são normalizados
+                    visualmente pelo maior valor entre as variáveis dos dois modelos.
+                </p>
+            </div>
+        </div>
+        <article class="card">
+            <div class="legend">
+                <span class="legend-item">
+                    <span class="legend-dot"></span> Árvore de Decisão
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot rf-dot"></span> Random Forest
+                </span>
+            </div>
+            <div id="feature-chart" class="feature-chart"></div>
+        </article>
+    </section>
+
+    <section class="section">
+        <div class="section-heading">
+            <div>
+                <h2>Resumo comparativo</h2>
+                <p class="section-description">
+                    Observações geradas automaticamente a partir das métricas.
+                </p>
+            </div>
+        </div>
+        <article class="card">
+            <ul id="summary-list" class="summary-list"></ul>
+            <div class="note">
+                Uma métrica isolada não determina a qualidade total de um classificador.
+                Considere o desbalanceamento das classes, o custo de falsos positivos
+                e falsos negativos e o objetivo do sistema ao interpretar os resultados.
+            </div>
+        </article>
+    </section>
+</main>
+
+<footer>
+    <div class="container footer-inner">
+        <span>NetPulse · Painel de visualização local</span>
+        <span>Gerado com Python · HTML estático · Tema claro</span>
+    </div>
+</footer>
+
+<script id="model-data" type="application/json">__MODEL_DATA__</script>
+
+<script>
+"use strict";
+
+const data = JSON.parse(
+    document.getElementById("model-data").textContent
+);
+
+const tree = data.arvore;
+const rf = data.random_forest;
+
+const CLASS_ORDER = ["OK", "RISCO", "FALHA"];
+
+function escapeHTML(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+}
+
+function number(value, digits = 3) {
+    if (value === null || value === undefined || value === "") {
+        return "—";
+    }
+
+    const parsed = Number(value);
+
+    if (!Number.isFinite(parsed)) {
+        return "—";
+    }
+
+    return parsed.toLocaleString("pt-BR", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+    });
+}
+
+function integer(value) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+        return "—";
+    }
+
+    return Number(value).toLocaleString("pt-BR", {
+        maximumFractionDigits: 0
+    });
+}
+
+function percent(value, digits = 1) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+        return "—";
+    }
+
+    return (Number(value) * 100).toLocaleString("pt-BR", {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+    }) + "%";
+}
+
+function className(name) {
+    const classes = {
+        "OK": "class-ok",
+        "RISCO": "class-risco",
+        "FALHA": "class-falha"
+    };
+
+    return classes[name] || "";
+}
+
+function modelName(model) {
+    return model.familia === "arvore_decisao"
+        ? "Árvore de Decisão"
+        : "Random Forest";
+}
+
+function metric(report, classLabel, metricName) {
+    return report?.[classLabel]?.[metricName];
+}
+
+function modelAccuracy(model) {
+    return model.classification_report?.accuracy;
+}
+
+function comparisonCard(title, description, a, b, formatter, higherIsBetter = true) {
+    const validA = Number.isFinite(Number(a));
+    const validB = Number.isFinite(Number(b));
+
+    let winner = null;
+    if (validA && validB && Number(a) !== Number(b)) {
+        winner = (Number(a) > Number(b)) === higherIsBetter ? "a" : "b";
+    }
+
+    let delta = "Não foi possível comparar os valores.";
+    if (validA && validB) {
+        const difference = Number(b) - Number(a);
+        const sign = difference > 0 ? "+" : "";
+        delta = "Diferença (RF − Árvore): " + sign +
+            formatter(difference, true);
+    }
+
+    return `
+        <article class="card">
+            <div class="kpi-label">${escapeHTML(title)}</div>
+            <div class="kpi-values">
+                <div>
+                    <div class="kpi-model">Árvore de Decisão</div>
+                    <div class="kpi-number ${winner === "a" ? "winner" : ""}">
+                        ${escapeHTML(formatter(a))}
+                    </div>
+                </div>
+                <div>
+                    <div class="kpi-model">Random Forest</div>
+                    <div class="kpi-number ${winner === "b" ? "winner" : ""}">
+                        ${escapeHTML(formatter(b))}
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-delta">${escapeHTML(delta)}</div>
+            <div class="section-description">${escapeHTML(description)}</div>
+        </article>
+    `;
+}
+
+function renderKPIs() {
+    const items = [
+        {
+            title: "Acurácia",
+            description: "Proporção total de classificações corretas.",
+            a: modelAccuracy(tree),
+            b: modelAccuracy(rf),
+            format: (v) => percent(v, 2),
+            deltaFormat: (v) => {
+                const n = Number(v);
+                return Number.isFinite(n)
+                    ? (n > 0 ? "+" : "") + (n * 100).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + " p.p."
+                    : "—";
+            }
+        },
+        {
+            title: "Macro F1 — teste",
+            description: "Média do F1-score entre as classes, sem ponderação pelo suporte.",
+            a: tree.macro_f1_teste,
+            b: rf.macro_f1_teste,
+            format: (v) => percent(v, 2),
+            deltaFormat: (v) => {
+                const n = Number(v);
+                return Number.isFinite(n)
+                    ? (n > 0 ? "+" : "") + (n * 100).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + " p.p."
+                    : "—";
+            }
+        },
+        {
+            title: "Recall — FALHA",
+            description: "Proporção das amostras realmente FALHA que foram identificadas.",
+            a: tree.recall_falha_teste,
+            b: rf.recall_falha_teste,
+            format: (v) => percent(v, 2),
+            deltaFormat: (v) => {
+                const n = Number(v);
+                return Number.isFinite(n)
+                    ? (n > 0 ? "+" : "") + (n * 100).toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }) + " p.p."
+                    : "—";
+            }
+        }
+    ];
+
+    document.getElementById("kpi-grid").innerHTML = items.map(item =>
+        comparisonCard(
+            item.title,
+            item.description,
+            item.a,
+            item.b,
+            (v, isDelta) => isDelta
+                ? item.deltaFormat(v)
+                : item.format(v)
+        )
+    ).join("");
+}
+
+function formatParameter(value) {
+    if (value === null) return "None / ilimitado";
+    if (value === true) return "Sim";
+    if (value === false) return "Não";
+    if (Array.isArray(value)) return value.map(formatParameter).join(", ");
+    if (typeof value === "object") return JSON.stringify(value);
+    return String(value);
+}
+
+function renderModelCard(model, isRF) {
+    const params = model.best_params || {};
+
+    const parameterHTML = Object.entries(params).map(([key, value]) => `
+        <div class="parameter">
+            <dt>${escapeHTML(key)}</dt>
+            <dd>${escapeHTML(formatParameter(value))}</dd>
+        </div>
+    `).join("");
+
+    return `
+        <article class="card model-card ${isRF ? "rf" : ""}">
+            <div class="model-heading">
+                <div>
+                    <div class="model-name">${escapeHTML(modelName(model))}</div>
+                    <div class="model-type">Seed: ${escapeHTML(model.seed ?? "—")}</div>
+                </div>
+                <span class="pill">${escapeHTML(model.features?.length ?? 0)} variáveis</span>
+            </div>
+
+            <dl class="parameter-list">
+                <div class="parameter">
+                    <dt>Combinações testadas</dt>
+                    <dd>${escapeHTML(integer(model.n_combinacoes_grade))}</dd>
+                </div>
+                <div class="parameter">
+                    <dt>Macro F1 — validação</dt>
+                    <dd>${escapeHTML(percent(model.macro_f1_validacao, 2))}</dd>
+                </div>
+                <div class="parameter">
+                    <dt>Macro F1 — teste</dt>
+                    <dd>${escapeHTML(percent(model.macro_f1_teste, 2))}</dd>
+                </div>
+                <div class="parameter">
+                    <dt>Recall FALHA — teste</dt>
+                    <dd>${escapeHTML(percent(model.recall_falha_teste, 2))}</dd>
+                </div>
+            </dl>
+
+            <h3 style="margin: 20px 0 10px;">Melhores hiperparâmetros</h3>
+            <dl class="parameter-list">${parameterHTML}</dl>
+        </article>
+    `;
+}
+
+function renderModelCards() {
+    document.getElementById("model-cards").innerHTML =
+        renderModelCard(tree, false) +
+        renderModelCard(rf, true);
+}
+
+function renderReport(model, targetId) {
+    const report = model.classification_report || {};
+
+    const rows = CLASS_ORDER.map(label => {
+        const item = report[label] || {};
+
+        return `
+            <tr>
+                <td><span class="class-badge ${className(label)}">${escapeHTML(label)}</span></td>
+                <td>${escapeHTML(percent(item.precision, 1))}</td>
+                <td>${escapeHTML(percent(item.recall, 1))}</td>
+                <td>${escapeHTML(percent(item["f1-score"], 1))}</td>
+                <td>${escapeHTML(integer(item.support))}</td>
+            </tr>
+        `;
+    }).join("");
+
+    const macro = report["macro avg"] || {};
+    const accuracy = report.accuracy;
+    const weighted = report["weighted avg"] || {};
+
+    document.getElementById(targetId).innerHTML = `
+        <table>
+            <thead>
+                <tr>
+                    <th>Classe</th>
+                    <th>Precisão</th>
+                    <th>Recall</th>
+                    <th>F1</th>
+                    <th>Suporte</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${rows}
+                <tr>
+                    <td><strong>Macro avg</strong></td>
+                    <td>${escapeHTML(percent(macro.precision, 1))}</td>
+                    <td>${escapeHTML(percent(macro.recall, 1))}</td>
+                    <td>${escapeHTML(percent(macro["f1-score"], 1))}</td>
+                    <td>${escapeHTML(integer(macro.support))}</td>
+                </tr>
+                <tr>
+                    <td><strong>Weighted avg</strong></td>
+                    <td>${escapeHTML(percent(weighted.precision, 1))}</td>
+                    <td>${escapeHTML(percent(weighted.recall, 1))}</td>
+                    <td>${escapeHTML(percent(weighted["f1-score"], 1))}</td>
+                    <td>${escapeHTML(integer(weighted.support))}</td>
+                </tr>
+                <tr>
+                    <td><strong>Acurácia</strong></td>
+                    <td colspan="3">${escapeHTML(percent(accuracy, 2))}</td>
+                    <td>${escapeHTML(integer(macro.support))}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+}
+
+function renderMatrix(model, targetId) {
+    const labels = model.confusion_matrix_labels || [];
+    const matrix = model.confusion_matrix || [];
+
+    const maxValue = Math.max(
+        1,
+        ...matrix.flat().map(value => Number(value) || 0)
+    );
+
+    let body = "";
+
+    for (let i = 0; i < labels.length; i++) {
+        body += `<tr><td>${escapeHTML(labels[i])}</td>`;
+
+        for (let j = 0; j < labels.length; j++) {
+            const value = Number(matrix[i]?.[j] ?? 0);
+            const intensity = Math.max(0, Math.min(1, value / maxValue));
+
+            // A cor indica apenas a magnitude relativa do valor.
+            const background = `rgba(37, 99, 235, ${0.05 + intensity * 0.22})`;
+
+            body += `
+                <td style="background:${background}">
+                    ${escapeHTML(integer(value))}
+                </td>
+            `;
+        }
+
+        body += "</tr>";
+    }
+
+    document.getElementById(targetId).innerHTML = `
+        <table class="matrix">
+            <thead>
+                <tr>
+                    <th>Real ↓ / Previsto →</th>
+                    ${labels.map(label =>
+                        `<th>${escapeHTML(label)}</th>`
+                    ).join("")}
+                </tr>
+            </thead>
+            <tbody>${body}</tbody>
+        </table>
+    `;
+}
+
+function renderFeatureChart() {
+    const treeFeatures = tree.feature_importances || {};
+    const rfFeatures = rf.feature_importances || {};
+
+    const allFeatures = [
+        ...new Set([
+            ...Object.keys(treeFeatures),
+            ...Object.keys(rfFeatures)
+        ])
+    ];
+
+    if (!allFeatures.length) {
+        document.getElementById("feature-chart").innerHTML =
+            '<p class="feature-empty">Não há importâncias de variáveis nos metadados.</p>';
+        return;
+    }
+
+    allFeatures.sort((a, b) =>
+        Math.max(Number(rfFeatures[b]) || 0, Number(treeFeatures[b]) || 0) -
+        Math.max(Number(rfFeatures[a]) || 0, Number(treeFeatures[a]) || 0)
+    );
+
+    const maxValue = Math.max(
+        0,
+        ...allFeatures.flatMap(feature => [
+            Number(treeFeatures[feature]) || 0,
+            Number(rfFeatures[feature]) || 0
+        ])
+    );
+
+    document.getElementById("feature-chart").innerHTML =
+        allFeatures.map(feature => {
+            const a = Number(treeFeatures[feature]) || 0;
+            const b = Number(rfFeatures[feature]) || 0;
+
+            const widthA = maxValue > 0 ? a / maxValue * 100 : 0;
+            const widthB = maxValue > 0 ? b / maxValue * 100 : 0;
+
+            return `
+                <div>
+                    <div class="feature-row">
+                        <div class="feature-name">${escapeHTML(feature)}</div>
+                        <div>
+                            <div class="bar-track" title="Árvore de Decisão: ${escapeHTML(number(a, 5))}">
+                                <div class="bar" style="width:${widthA}%"></div>
+                            </div>
+                        </div>
+                        <div class="feature-value">${escapeHTML(percent(a, 2))}</div>
+                    </div>
+                    <div class="feature-row" style="margin-top:5px">
+                        <div class="feature-name" style="color:var(--muted)">Random Forest</div>
+                        <div>
+                            <div class="bar-track" title="Random Forest: ${escapeHTML(number(b, 5))}">
+                                <div class="bar rf-bar" style="width:${widthB}%"></div>
+                            </div>
+                        </div>
+                        <div class="feature-value">${escapeHTML(percent(b, 2))}</div>
+                    </div>
+                </div>
+            `;
+        }).join("");
+}
+
+function renderSummary() {
+    const items = [];
+
+    const treeF1 = Number(tree.macro_f1_teste);
+    const rfF1 = Number(rf.macro_f1_teste);
+    const treeRecall = Number(tree.recall_falha_teste);
+    const rfRecall = Number(rf.recall_falha_teste);
+
+    if (Number.isFinite(treeF1) && Number.isFinite(rfF1)) {
+        const winner = rfF1 > treeF1
+            ? "Random Forest"
+            : treeF1 > rfF1
+                ? "Árvore de Decisão"
+                : "ambos os modelos";
+
+        items.push({
+            title: "Macro F1 no teste",
+            text: `${winner} apresenta ${winner === "ambos os modelos" ? "o mesmo resultado" : "o maior Macro F1"}: ` +
+                `${percent(Math.max(treeF1, rfF1), 2)}.`
+        });
+    }
+
+    if (Number.isFinite(treeRecall) && Number.isFinite(rfRecall)) {
+        const winner = rfRecall > treeRecall
+            ? "Random Forest"
+            : treeRecall > rfRecall
+                ? "Árvore de Decisão"
+                : "ambos os modelos";
+
+        items.push({
+            title: "Detecção de FALHA",
+            text: `${winner} apresenta ${winner === "ambos os modelos" ? "o mesmo recall" : "o maior recall"} para FALHA: ` +
+                `${percent(Math.max(treeRecall, rfRecall), 2)}.`
+        });
+    }
+
+    const treeRisk = Number(metric(tree.classification_report, "RISCO", "recall"));
+    const rfRisk = Number(metric(rf.classification_report, "RISCO", "recall"));
+
+    if (Number.isFinite(treeRisk) && Number.isFinite(rfRisk)) {
+        const winner = rfRisk > treeRisk
+            ? "Random Forest"
+            : treeRisk > rfRisk
+                ? "Árvore de Decisão"
+                : "ambos os modelos";
+
+        items.push({
+            title: "Identificação da classe RISCO",
+            text: `${winner} apresenta o maior recall para RISCO: ` +
+                `${percent(Math.max(treeRisk, rfRisk), 2)}. Essa métrica merece atenção específica.`
+        });
+    }
+
+    const supports = CLASS_ORDER.map(label => ({
+        label,
+        tree: Number(tree.classification_report?.[label]?.support),
+        rf: Number(rf.classification_report?.[label]?.support)
+    }));
+
+    const classSupport = supports.find(item =>
+        Number.isFinite(item.tree) &&
+        Number.isFinite(item.rf) &&
+        item.tree !== item.rf
+    );
+
+    if (!classSupport) {
+        items.push({
+            title: "Comparabilidade",
+            text: "As quantidades de amostras por classe podem ser verificadas nas tabelas acima. As comparações devem usar o mesmo conjunto de teste."
+        });
+    } else {
+        items.push({
+            title: "Suporte por classe",
+            text: `O suporte de ${classSupport.label} difere entre os relatórios. Verifique se ambos os modelos foram avaliados sobre o mesmo conjunto de teste.`
+        });
+    }
+
+    document.getElementById("summary-list").innerHTML =
+        items.map(item => `
+            <li class="summary-item">
+                <span class="summary-icon">i</span>
+                <div class="summary-text">
+                    <strong>${escapeHTML(item.title)}.</strong>
+                    ${escapeHTML(item.text)}
+                </div>
+            </li>
+        `).join("");
+}
+
+function render() {
+    renderKPIs();
+    renderModelCards();
+    renderReport(tree, "report-tree");
+    renderReport(rf, "report-rf");
+    renderMatrix(tree, "matrix-tree");
+    renderMatrix(rf, "matrix-rf");
+    renderFeatureChart();
+    renderSummary();
+}
+
+render();
+</script>
+</body>
+</html>
+"""
+
+    return template.replace("__MODEL_DATA__", models_json)
+
+
+# ============================================================
+# Execução
+# ============================================================
+
+def main() -> None:
+    """Carrega os metadados e gera a página comparativa."""
+
+    print("Lendo os metadados dos modelos...")
+
+    arvore = load_json(DECISION_TREE_FILE)
+    random_forest = load_json(RANDOM_FOREST_FILE)
+
+    validate_metadata(
+        arvore,
+        expected_family="arvore_decisao",
+        path=DECISION_TREE_FILE,
+    )
+
+    validate_metadata(
+        random_forest,
+        expected_family="random_forest",
+        path=RANDOM_FOREST_FILE,
+    )
+
+    print("Metadados carregados e validados.")
+
+    html_content = generate_html(arvore, random_forest)
+
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_FILE.write_text(html_content, encoding="utf-8")
+
+    print(f"Painel gerado com sucesso:\n{OUTPUT_FILE}")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        print(f"\nErro ao gerar o painel: {error}")
+        raise SystemExit(1)
