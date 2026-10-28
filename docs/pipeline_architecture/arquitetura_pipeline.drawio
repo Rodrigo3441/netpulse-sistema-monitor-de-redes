@@ -1,0 +1,194 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="-2PUo1A2jXbR2t-oAZeF">
+    <mxGraphModel dx="2279" dy="708" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-58" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="600" width="1030" x="-10" y="130" as="geometry" />
+        </mxCell>
+        <mxCell id="-LZ91jcEYWsF3iZCp5iF-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;" value="" vertex="1">
+          <mxGeometry height="541" width="120" x="41" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="-LZ91jcEYWsF3iZCp5iF-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=default;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Fonte&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="90" x="56" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="-LZ91jcEYWsF3iZCp5iF-3" edge="1" parent="1" source="-LZ91jcEYWsF3iZCp5iF-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="-LZ91jcEYWsF3iZCp5iF-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="-LZ91jcEYWsF3iZCp5iF-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; " vertex="1">
+          <mxGeometry height="541" width="404" x="230" y="161" as="geometry" />
+        </mxCell>
+        <mxCell id="-LZ91jcEYWsF3iZCp5iF-7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;" value="" vertex="1">
+          <mxGeometry height="278" width="280" x="690" y="422" as="geometry" />
+        </mxCell>
+        <mxCell id="-LZ91jcEYWsF3iZCp5iF-64" parent="1" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.entity_resolution;" value="modelo_arvore_decisao.joblib" vertex="1">
+          <mxGeometry height="45" width="45" x="840" y="538.5" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-1" parent="1" style="aspect=fixed;sketch=0;html=1;dashed=0;whitespace=wrap;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#2875E2;strokeColor=#ffffff;points=[[0.005,0.63,0],[0.1,0.2,0],[0.9,0.2,0],[0.5,0,0],[0.995,0.63,0],[0.72,0.99,0],[0.5,1,0],[0.28,0.99,0]];shape=mxgraph.kubernetes.icon2;kubernetesLabel=1;prIcon=api" value="API RIPE Atlas" vertex="1">
+          <mxGeometry height="48" width="50" x="76" y="201" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-6" parent="1" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.web_page;" value="period_a.csv" vertex="1">
+          <mxGeometry height="54" width="50" x="76" y="372.5" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-7" parent="1" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.web_page;" value="period_b.csv" vertex="1">
+          <mxGeometry height="54" width="50" x="76" y="463.5" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-8" parent="1" style="shape=singleArrow;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;arrowWidth=0.3333333333333447;arrowSize=0.38333333333333236;rotation=90;" value="" vertex="1">
+          <mxGeometry height="30" width="60" x="71" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-9" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;fillColor=#f5f5f5;strokeColor=#666666;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="150" y="560" as="sourcePoint" />
+            <mxPoint x="56" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-10" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: x-small; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Coleta de dois datasets de 7 dias: um para construir o baseline e outro para rotulagem, ambos baseados no protocolo ICMP.&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="96" x="50" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-15" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=default;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Preparação e rotulagem&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="230" x="317" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=20;fontStyle=1;align=center;" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Construção do baseline&lt;/font&gt;&lt;div&gt;&lt;span style=&quot;font-weight: normal;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Gera a referência histórica por fluxo a partir do período A&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="230" x="250" y="190" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-19" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-6" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" target="pCsW1oOk0PIOgaTHtUYe-17" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="180" y="420" as="sourcePoint" />
+            <mxPoint x="230" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-20" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=20;fontColor=#333333;fontStyle=1" value="&lt;font style=&quot;font-size: 14px;&quot;&gt;Rotulagem do período B&lt;br&gt;&lt;/font&gt;&lt;div style=&quot;&quot;&gt;&lt;span style=&quot;font-weight: normal;&quot;&gt;&lt;font style=&quot;font-size: 14px;&quot;&gt;Utiliza o baseline para atribuir as classes OK, RISCO e FALHA&lt;/font&gt;&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="230" x="250" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-21" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-7" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" target="pCsW1oOk0PIOgaTHtUYe-20" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="170" y="490" as="sourcePoint" />
+            <mxPoint x="220" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-22" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-17" style="endArrow=classic;html=1;rounded=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="pCsW1oOk0PIOgaTHtUYe-20" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="520" y="300" as="sourcePoint" />
+            <mxPoint x="570" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-23" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=20;fontStyle=1" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;Deslocamento temporal&amp;nbsp;&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 14px; font-weight: normal; background-color: transparent; color: light-dark(rgb(51, 51, 51), rgb(193, 193, 193));&quot;&gt;Desloca os rótulos (classes) dentro de cada fluxo para representar a classe futura a ser prevista&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="103.5" width="230" x="250" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-24" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-20" style="endArrow=classic;html=1;rounded=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="pCsW1oOk0PIOgaTHtUYe-23" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="520" y="450" as="sourcePoint" />
+            <mxPoint x="570" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-25" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=20;fontStyle=1" value="&lt;span style=&quot;font-size: 14px;&quot;&gt;Divisão dos dados (split)&lt;/span&gt;&lt;div&gt;&lt;span style=&quot;font-size: 14px; font-weight: 400;&quot;&gt;Separação por pares de fluxo em treino, validação e teste&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="230" x="250" y="517.5" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-27" parent="1" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.web_page;" value="baseline_por_fluxo.csv" vertex="1">
+          <mxGeometry height="30" width="30" x="549" y="201" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-28" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=9;endSize=4;fillColor=#f5f5f5;strokeColor=#666666;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="494" y="215.57999999999998" as="sourcePoint" />
+            <mxPoint x="534" y="215.58" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-29" parent="1" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.web_page;" value="period_b_labeled.csv" vertex="1">
+          <mxGeometry height="30" width="30" x="549" y="298" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-30" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=11;endSize=5;fillColor=#f5f5f5;strokeColor=#666666;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="494" y="314.58" as="sourcePoint" />
+            <mxPoint x="534" y="314.58000000000004" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-31" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-23" style="endArrow=classic;html=1;rounded=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="pCsW1oOk0PIOgaTHtUYe-25" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="440" y="390" as="sourcePoint" />
+            <mxPoint x="440" y="420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-32" parent="1" style="sketch=0;pointerEvents=1;shadow=0;dashed=0;html=1;strokeColor=none;fillColor=#505050;labelPosition=center;verticalLabelPosition=bottom;verticalAlign=top;outlineConnect=0;align=center;shape=mxgraph.office.concepts.web_page;" value="period_b_split.csv" vertex="1">
+          <mxGeometry height="30" width="30" x="555" y="530" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-35" edge="1" parent="1" style="shape=flexArrow;endArrow=classic;html=1;rounded=0;width=11;endSize=5;fillColor=#f5f5f5;strokeColor=#666666;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="495" y="544.58" as="sourcePoint" />
+            <mxPoint x="535" y="544.58" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-36" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;fillColor=#f5f5f5;strokeColor=#666666;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="622" y="610" as="sourcePoint" />
+            <mxPoint x="242" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-37" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;font size=&quot;1&quot;&gt;A etapa de preparação e rotulagem constrói o baseline com o Período A, utiliza-o para classificar as medições do Período B, desloca temporalmente as classes&amp;nbsp; em 12 minutos para prever estados futuros da rede e divide os dados por pares de fluxo em treino, validação e teste. O resultado final é o arquivo period_b_split.csv, utilizado no treinamento dos modelos de machine learning.&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="370" x="247" y="616" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-38" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;dashed=1;" value="&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; " vertex="1">
+          <mxGeometry height="240.5" width="280" x="690" y="159" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-40" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=20;fontStyle=1" value="&lt;div&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;Treinamento da árvore de decisão (decision tree)&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="54" width="238" x="712" y="198" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-41" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=default;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Treinamento dos modelos&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="260" x="700" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-42" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=20;fontStyle=1" value="&lt;div&gt;&lt;span style=&quot;font-size: 14px;&quot;&gt;Treinamento do random forest&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="54" width="175" x="710" y="291" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-43" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-32" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" target="pCsW1oOk0PIOgaTHtUYe-40" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="650" y="560" as="sourcePoint" />
+            <mxPoint x="700" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-44" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-32" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;edgeStyle=orthogonalEdgeStyle;curved=1;" target="pCsW1oOk0PIOgaTHtUYe-42" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="670" y="545.03" />
+              <mxPoint x="670" y="318" />
+            </Array>
+            <mxPoint x="650" y="580" as="sourcePoint" />
+            <mxPoint x="700" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-50" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=none;fillColor=default;" value="&lt;font style=&quot;font-size: 20px;&quot;&gt;Artefatos Finais&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="152.5" x="750" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-51" parent="1" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;fillColor=#8C4FFF;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.entity_resolution;" value="modelo_random_forest.joblib" vertex="1">
+          <mxGeometry height="45" width="45" x="750" y="463.5" as="geometry" />
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-53" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-40" style="endArrow=classic;html=1;rounded=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;curved=1;" target="-LZ91jcEYWsF3iZCp5iF-64" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1040" y="380" />
+            </Array>
+            <mxPoint x="1030" y="390" as="sourcePoint" />
+            <mxPoint x="1080" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-54" edge="1" parent="1" source="pCsW1oOk0PIOgaTHtUYe-42" style="endArrow=classic;html=1;rounded=0;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;curved=1;" target="pCsW1oOk0PIOgaTHtUYe-51" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <Array as="points">
+              <mxPoint x="1030" y="420" />
+            </Array>
+            <mxPoint x="1040" y="420" as="sourcePoint" />
+            <mxPoint x="1090" y="370" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-55" edge="1" parent="1" style="endArrow=none;html=1;rounded=0;fillColor=#f5f5f5;strokeColor=#666666;" value="">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="951.25" y="610" as="sourcePoint" />
+            <mxPoint x="701.25" y="610" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pCsW1oOk0PIOgaTHtUYe-56" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;font size=&quot;1&quot;&gt;Os modelos Decision Tree e Random Forest são salvos em arquivos `.joblib`, permitindo sua reutilização posterior para classificar novas medições de rede e prever possíveis falhas. Dessa forma, os modelos podem ser carregados para realizar previsões sem a necessidade de um novo treinamento a cada execução.&lt;/font&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="260" x="700" y="621" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
