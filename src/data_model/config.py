@@ -35,7 +35,7 @@ N_JOBS_SEARCH = -1
 
 # True usa as grades didáticas completas do notebook de referência
 # False usa só a combinação vencedora comentada no notebook (busca rápida).
-USAR_GRADE_COMPLETA = True
+USAR_GRADE_COMPLETA = False
 
 GRADE_ARVORE_COMPLETA = {
     "max_depth": [3, 5, 8, 12, None],
@@ -44,9 +44,9 @@ GRADE_ARVORE_COMPLETA = {
 }
 
 GRADE_ARVORE_RAPIDA = {
-    "max_depth": [None],
+    "max_depth": [5],
     "min_samples_leaf": [100],
-    "class_weight": [None],
+    "class_weight": ['balanced'],
 }
 
 GRADE_RF_COMPLETA = {
