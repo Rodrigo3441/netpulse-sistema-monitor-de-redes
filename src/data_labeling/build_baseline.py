@@ -77,6 +77,18 @@ def calculate_baseline(flow_df):
 
     jitter_tipico = jitter_values.median()
 
+    periodo_inicio = pd.to_datetime(
+    flow_df['timestamp'].min(),
+    unit='s',
+    utc=True
+    ).isoformat()
+
+    periodo_fim = pd.to_datetime(
+        flow_df['timestamp'].max(),
+        unit='s',
+        utc=True
+    ).isoformat()
+
     sent = flow_df['sent']
     rcvd = flow_df['rcvd']
 
@@ -94,6 +106,8 @@ def calculate_baseline(flow_df):
     q3 = valid_rtt.quantile(0.75)
 
     return {
+        'periodo_inicio': periodo_inicio,
+        'periodo_fim': periodo_fim,
         'total_medicoes': len(flow_df),
         'rtts_validos': len(valid_rtt),
         'mediana': median,
@@ -115,10 +129,29 @@ def build_baselines(df):
     for (msm_id, probe_id), flow_df in df.groupby(FLOW_COLUMNS):
         stats = calculate_baseline(flow_df)
 
+        estatisticas_rtt_validas = all(
+            pd.notna(stats[col]) and math.isfinite(stats[col])
+            for col in ['mediana', 'MAD', 'q1', 'q3', 'IQR']
+        )
+
+        baseline_valido = (
+            stats['rtts_validos'] >= MIN_VALID_RTT
+            and estatisticas_rtt_validas
+        )
+
+        referencias_completas = all(
+            pd.notna(stats[col]) and math.isfinite(stats[col])
+            for col in ['mediana', 'MAD', 'IQR', 'jitter_tipico']
+        )
+
+        recomendado_uso = baseline_valido and referencias_completas
+
         flow_info = {
             'msm_id': msm_id,
             'probe_id': probe_id,
-            **stats
+            **stats,
+            'baseline_valido': baseline_valido,
+            'recomendado_uso': recomendado_uso
         }
 
         if stats['rtts_validos'] < MIN_VALID_RTT:
