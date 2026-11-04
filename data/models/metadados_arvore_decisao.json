@@ -1,0 +1,280 @@
+{
+  "nome": "NetPulse Arvore Decisao",
+  "versao": "1.0.0",
+  "ambiente": {
+    "python": "3.14.6",
+    "scikit_learn": "1.9.1",
+    "numpy": "2.5.1",
+    "pandas": "3.0.3",
+    "joblib": "1.6.0"
+  },
+  "familia": "arvore_decisao",
+  "seed": 42,
+  "features": [
+    "perda_pct",
+    "aumento_pct",
+    "z_robusto",
+    "jitter_atual",
+    "jitter_relativo",
+    "timeout_atual",
+    "n5_timeout",
+    "n5_aumento80",
+    "n5_risco"
+  ],
+  "entradas": [
+    {
+      "nome": "perda_pct",
+      "tipo": "float",
+      "descricao": "Percentual de perda de pacotes."
+    },
+    {
+      "nome": "aumento_pct",
+      "tipo": "float",
+      "descricao": "Variação percentual do RTT em relação à mediana do baseline."
+    },
+    {
+      "nome": "z_robusto",
+      "tipo": "float",
+      "descricao": "Desvio robusto do RTT em relação ao baseline."
+    },
+    {
+      "nome": "jitter_atual",
+      "tipo": "float",
+      "descricao": "Média das diferenças absolutas entre RTTs válidos consecutivos."
+    },
+    {
+      "nome": "jitter_relativo",
+      "tipo": "float",
+      "descricao": "Relação entre o jitter atual e o jitter típico do baseline."
+    },
+    {
+      "nome": "timeout_atual",
+      "tipo": "int",
+      "descricao": "Indicador de timeout: 1 para timeout e 0 caso contrário."
+    },
+    {
+      "nome": "n5_timeout",
+      "tipo": "int",
+      "descricao": "Quantidade de timeouts nas últimas cinco medições."
+    },
+    {
+      "nome": "n5_aumento80",
+      "tipo": "int",
+      "descricao": "Quantidade de medições com aumento_pct > 80 nas últimas cinco."
+    },
+    {
+      "nome": "n5_risco",
+      "tipo": "int",
+      "descricao": "Quantidade de medições que atendem a pelo menos um critério de risco nas últimas cinco."
+    }
+  ],
+  "n_combinacoes_grade": 1,
+  "best_params": {
+    "class_weight": "balanced",
+    "max_depth": 5,
+    "min_samples_leaf": 100
+  },
+  "macro_f1_validacao": 0.539414064566413,
+  "macro_f1_teste": 0.554948426390378,
+  "recall_falha_teste": 0.48666846215997844,
+  "classification_report": {
+    "OK": {
+      "precision": 0.9152721043615759,
+      "recall": 0.8520608439646713,
+      "f1-score": 0.8825360523473731,
+      "support": 8152.0
+    },
+    "RISCO": {
+      "precision": 0.08970886932972241,
+      "recall": 0.4058192955589586,
+      "f1-score": 0.14693651233712227,
+      "support": 653.0
+    },
+    "FALHA": {
+      "precision": 0.9149367088607595,
+      "recall": 0.48666846215997844,
+      "f1-score": 0.6353727144866386,
+      "support": 3713.0
+    },
+    "accuracy": 0.7204026202268733,
+    "macro avg": {
+      "precision": 0.639972560850686,
+      "recall": 0.5815162005612028,
+      "f1-score": 0.554948426390378,
+      "support": 12518.0
+    },
+    "weighted avg": {
+      "precision": 0.8721072125281895,
+      "recall": 0.7204026202268733,
+      "f1-score": 0.7708517598802376,
+      "support": 12518.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      6946,
+      1065,
+      141
+    ],
+    [
+      361,
+      265,
+      27
+    ],
+    [
+      282,
+      1624,
+      1807
+    ]
+  ],
+  "confusion_matrix_labels": [
+    "OK",
+    "RISCO",
+    "FALHA"
+  ],
+  "feature_importances": {
+    "perda_pct": 0.0,
+    "aumento_pct": 0.07126330880534801,
+    "z_robusto": 0.6480891906329268,
+    "jitter_atual": 0.008997586534060013,
+    "jitter_relativo": 0.13178006627082103,
+    "timeout_atual": 0.0,
+    "n5_timeout": 0.0,
+    "n5_aumento80": 0.0,
+    "n5_risco": 0.13986984775684402
+  },
+  "calculo_features": {
+    "perda_pct": {
+      "formula": "((sent - rcvd) / sent) * 100",
+      "regra": "Calculada somente quando sent > 0."
+    },
+    "aumento_pct": {
+      "formula": "((rtt_valido - mediana) / mediana) * 100",
+      "regra": "Compara o RTT atual com a mediana do baseline."
+    },
+    "z_robusto": {
+      "formula": "(rtt_valido - mediana) / (1.4826 * MAD)",
+      "regra": "Se MAD = 0, retorna 0 quando RTT = mediana; caso contrário, usa (RTT - mediana) / max(IQR / 1.349, 1)."
+    },
+    "jitter_atual": {
+      "formula": "Média das diferenças absolutas entre RTTs válidos consecutivos.",
+      "regra": "Ignora RTTs inválidos e retorna ausente quando não há diferenças calculáveis."
+    },
+    "jitter_relativo": {
+      "formula": "jitter_atual / jitter_tipico",
+      "regra": "Se jitter_tipico = 0, retorna 1 quando ambos são zero e 3 quando o jitter atual é positivo."
+    },
+    "timeout_atual": {
+      "formula": "1 se não há RTT válido ou perda_pct = 100; caso contrário, 0."
+    },
+    "n5_timeout": {
+      "formula": "Soma dos timeouts nas últimas 5 medições do fluxo, incluindo a atual."
+    },
+    "n5_aumento80": {
+      "formula": "Quantidade das últimas 5 medições com aumento_pct > 80."
+    },
+    "n5_risco": {
+      "formula": "Quantidade das últimas 5 medições que atendem a pelo menos um critério de risco.",
+      "criterios": [
+        "2 <= z_robusto < 3.5",
+        "30 <= aumento_pct <= 80",
+        "jitter_relativo >= 3"
+      ]
+    },
+    "regras_gerais": [
+      "As medições são agrupadas por msm_id e probe_id e ordenadas por timestamp.",
+      "As contagens usam até 5 medições disponíveis no início do histórico.",
+      "Valores não calculáveis permanecem ausentes, exceto nos casos com tratamento específico descrito acima."
+    ]
+  },
+  "horizonte_previsao": {
+    "intervalo_minimo_segundos": 720,
+    "intervalo_minimo_minutos": 12,
+    "regra": "A classe futura corresponde à primeira medição do mesmo fluxo cujo timestamp seja maior ou igual ao timestamp atual acrescido de 720 segundos.",
+    "tratamento_sem_medicao_futura": "A medição atual é removida do conjunto de dados quando não existe uma medição posterior que atenda ao horizonte mínimo."
+  },
+  "historico_necessario": {
+    "identificacao_fluxo": [
+      "msm_id",
+      "probe_id"
+    ],
+    "dados_brutos_medicao": [
+      "timestamp",
+      "avg",
+      "sent",
+      "rcvd",
+      "result"
+    ],
+    "janela_recente": {
+      "quantidade_maxima": 5,
+      "inclui_medicao_atual": true,
+      "agrupamento": [
+        "msm_id",
+        "probe_id"
+      ],
+      "ordenacao": "timestamp crescente",
+      "regra": "As features de contagem são recalculadas usando até cinco medições disponíveis do mesmo fluxo, incluindo a atual."
+    },
+    "recalculo_features": "As nove features devem ser calculadas antes de chamar o modelo, utilizando a medição atual, o histórico recente e os valores de referência necessários."
+  },
+  "saida": {
+    "tipo": "classificacao",
+    "descricao": "Classe prevista para o estado do fluxo de rede no horizonte futuro definido pelo projeto.",
+    "classes": {
+      "OK": "Nenhum critério de RISCO ou FALHA foi atendido.",
+      "RISCO": "A medição atende a pelo menos um critério individual de risco e n5_risco >= 2.",
+      "FALHA": "A medição apresenta perda_pct >= 10, n5_timeout >= 3, z_robusto >= 3.5 com RTT presente ou n5_aumento80 >= 2."
+    },
+    "prioridade_rotulagem": [
+      "FALHA",
+      "RISCO",
+      "OK"
+    ],
+    "ordem_classes_modelo": [
+      "FALHA",
+      "OK",
+      "RISCO"
+    ],
+    "ordem_matriz_confusao": [
+      "OK",
+      "RISCO",
+      "FALHA"
+    ]
+  },
+  "exemplo_entrada_saida": {
+    "entrada": {
+      "perda_pct": 0.0,
+      "aumento_pct": -0.8133,
+      "z_robusto": -2.2003,
+      "jitter_atual": 0.0805,
+      "jitter_relativo": 0.5089,
+      "timeout_atual": 0,
+      "n5_timeout": 0,
+      "n5_aumento80": 0,
+      "n5_risco": 0
+    },
+    "saida_prevista": "OK"
+  },
+  "regras_uso_baseline": {
+    "periodo_origem": "Período A",
+    "imutabilidade": "O baseline é calculado no Período A e permanece congelado durante o cálculo das métricas do Período B.",
+    "agrupamento": [
+      "msm_id",
+      "probe_id"
+    ],
+    "minimo_rtt_validos": 1500,
+    "estatisticas_utilizadas": [
+      "mediana",
+      "MAD",
+      "IQR",
+      "jitter_tipico"
+    ],
+    "associacao": "Cada fluxo do Período B deve possuir exatamente uma linha correspondente no baseline, identificada por msm_id e probe_id.",
+    "validacao": "Fluxos ausentes no baseline ou registros duplicados provocam ValueError.",
+    "aplicacao": {
+      "aumento_pct": "Compara o RTT atual com a mediana do baseline.",
+      "z_robusto": "Utiliza a mediana, o MAD e, quando necessário, o IQR do baseline.",
+      "jitter_relativo": "Compara o jitter atual com o jitter_tipico do baseline."
+    }
+  }
+}

@@ -1,0 +1,2 @@
+mean_fit_time,std_fit_time,mean_score_time,std_score_time,param_class_weight,param_max_depth,param_min_samples_leaf,params,split0_test_score,mean_test_score,std_test_score,rank_test_score,split0_train_score,mean_train_score,std_train_score
+0.35146403312683105,0.0,0.05599212646484375,0.0,balanced,5,100,"{'class_weight': 'balanced', 'max_depth': 5, 'min_samples_leaf': 100}",0.539414064566413,0.539414064566413,0.0,1,0.6071632564557828,0.6071632564557828,0.0
