@@ -7,10 +7,10 @@ Esta pasta contém os scripts responsáveis pela preparação, cálculo de métr
 | Script | Responsabilidade |
 |---|---|
 | `inspect_dataset.py` | Inspeciona os datasets e ajuda a entender sua estrutura e qualidade antes do processamento. |
-| `build_baseline.py` | Constrói a linha de base de cada fluxo usando exclusivamente os dados do Período A. Calcula estatísticas de referência, como mediana, MAD, IQR, jitter típico e perda típica. |
+| `build_baseline.py` | Constrói uma linha de base para cada fluxo utilizando exclusivamente os dados do Período A. Calcula estatísticas de referência, como mediana, MAD, IQR, jitter típico e perda típica. Exige pelo menos 1.500 RTTs válidos por fluxo e gera indicadores de validade e recomendação de uso do baseline, separando os fluxos com quantidade insuficiente de dados. |
 | `calculate_metrics.py` | Calcula as métricas do Período B em relação à linha de base congelada, incluindo aumento percentual, z-score robusto, perda, jitter relativo e indicadores temporais. |
-| `label_period_b.py` | Atribui as classes `OK`, `RISCO` e `FALHA` às medições do Período B. |
-| `split_dataset.py` | Divide cronologicamente as medições rotuladas de cada fluxo em treino (`train`), validação (`validation`) e teste (`test`), adicionando a coluna `split`. |
+| `label_period_b.py` | Realiza a rotulagem das medições do Período B, atribuindo as classes OK, RISCO e FALHA por meio de regras hierárquicas que consideram perda de pacotes, timeouts, desvios de RTT, jitter e recorrência temporal. Também incorpora a distância geográfica dos fluxos a partir dos metadados e registra a regra responsável por cada classificação em regra_rotulagem, permitindo auditar os resultados. |
+| `split_dataset.py` | Cria a variável-alvo classe_futura utilizando um horizonte mínimo de 12 minutos, associando cada medição à classe da primeira medição futura elegível do mesmo par. Remove registros sem uma medição futura correspondente e divide os pares em conjuntos de treino (train), validação (validation) e teste (test), utilizando uma distribuição aleatória e estratificada por categoria de distância, com seed 42. Garante que cada par pertença exclusivamente a um conjunto e adiciona a coluna split ao dataset. |
 
 ## Ordem de execução
 
