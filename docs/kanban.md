@@ -1,7 +1,6 @@
 | Status          | Tarefa                    | Responsável |
 | --------------- | ------------------------- | ----------- |
 | ⬜ A Fazer      |  |  |
-
 | ⬜ A Fazer      | Video de 90 segundos sobre o projeto | @Gisele |
 | ⬜ A Fazer      | Produzir página do artigo do projeto | @Gisele |
 | 🔵 Em Andamento |  |  |
