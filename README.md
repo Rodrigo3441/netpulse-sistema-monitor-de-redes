@@ -1,6 +1,10 @@
 # NetPulse — Sistema de Monitoramento e Predição de Falhas em Redes
 Sistema para monitoramento de métricas de rede com análise em tempo real e predição de falhas fazendo uso de árvore de decisão e usando como base de dados a RIPE Atlas API.
 
+## Links de acesso ao vídeo de negócios e blog
+
+[Artigo do Projeto NetPulse](https://artigoprojetonetpulse.netlify.app/)
+
 ## 👨‍💻 Equipe e contexto acadêmico:
 
 - Eduardo Gabriel de Souza Cardozo
