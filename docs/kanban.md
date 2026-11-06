@@ -1,7 +1,6 @@
 | Status          | Tarefa                    | Responsável |
 | --------------- | ------------------------- | ----------- |
-| ⬜ A Fazer      |  |  |
-| ⬜ A Fazer      | Video de 90 segundos sobre o projeto | @Rodrigo |
+| ⬜ A Fazer      | |  |
 | ⬜ A Fazer      | |  |
 | 🔵 Em Andamento | Produzir página do artigo do projeto | @Gisele |
 | ✅ Concluído    | Atualizar memorando de decisão | @Gisele |
@@ -13,3 +12,4 @@
 | ✅ Concluído    | Configurar notebook de coleta e definição dos pares | @Rodrigo |
 | ✅ Concluído    | Construir coleta de dados do projeto em python | @Rodrigo |
 | ✅ Concluído    | Preencher tarefas.md e colocá-las em docs | @Gabriel |
+| ✅ Concluído    | Video de 90 segundos sobre o projeto | @Rodrigo |
