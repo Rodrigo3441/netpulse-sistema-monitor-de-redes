@@ -1,9 +1,9 @@
 | Status          | Tarefa                    | Responsável |
 | --------------- | ------------------------- | ----------- |
 | ⬜ A Fazer      |  |  |
-| ⬜ A Fazer      | Video de 90 segundos sobre o projeto | @Gisele |
-| ⬜ A Fazer      | Produzir página do artigo do projeto | @Gisele |
-| 🔵 Em Andamento |  |  |
+| ⬜ A Fazer      | Video de 90 segundos sobre o projeto | @Rodrigo |
+| ⬜ A Fazer      | |  |
+| 🔵 Em Andamento | Produzir página do artigo do projeto | @Gisele |
 | ✅ Concluído    | Atualizar memorando de decisão | @Gisele |
 | ✅ Concluído    | Implementação da coleta de dados | @Rodrigo |
 | ✅ Concluído    | Justificar escolhas da equipe  | @Eduardo |
