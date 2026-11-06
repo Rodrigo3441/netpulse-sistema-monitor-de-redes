@@ -101,6 +101,7 @@ Os resultados e os metadados dos experimentos são utilizados para documentar os
 ``` bash
 netpulse-sistema-monitor-de-redes/
 ├── archive/                       # arquivos de dados inutilizados
+├── assets/                        # arquivos relacionados à página HTML do artigo (CSS, JS, Images)
 ├── data/                          
 │   ├── interim/                   # contem dados referente ao dataset processado
 │   ├── models/                    # contem metadados sobre os modelos
@@ -111,16 +112,59 @@ netpulse-sistema-monitor-de-redes/
 │   ├── data_collection/           # contem os scripts relacionados a coleta e criação do cache
 │   ├── data_labeling/             # contem os scripts relacionamos a rotulação dos dados
 │   ├── data_model/                # contem os scripts do treinamento dos modelos
+│   ├── data_visualization         # contem o script responsável por gerar uma página HTML contendo os metadados dos modelos
 │   ├── etl_data_collection.py     # orquestrador da etapa de criação do cache
 │   ├── etl_data_labeling.py       # orquestrador da etapa de rotulação
 │   └── etl_data_model.py          # orquestrador do treinamento dos modelos
 ├── .gitignore          
+├── index.html                     # página HTML do artigo do projeto          
 ├── LICENSE
 ├── main.py                        # arquivo de execução principal do projeto
+├── requirements.txt               # dependências necessárias para execução do projeto
 └── README.md
 ```
 
 ## Como executar
+
+O ponto de entrada do NetPulse é o arquivo `main.py`, localizado na raiz do repositório. Ele é responsável por iniciar a execução do pipeline do projeto.
+
+1. Clone o repositório:
+
+   ```bash
+   git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git
+   ```
+
+2. Acesse a pasta do projeto:
+
+   ```bash
+   cd netpulse-sistema-monitor-de-redes
+   ```
+
+3. Instale as dependências:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Execute o pipeline:
+
+   ```bash
+   python main.py
+   ```
+
+### Visualização dos resultados (opcional)
+
+Após a conclusão do pipeline, com os modelos treinados e exportados, é possível gerar uma página HTML contendo os metadados e informações dos modelos.
+
+Para isso, execute:
+
+```bash
+python src/data_visualization/create_page.py
+```
+
+O script gera uma página HTML para facilitar a consulta e comparação das informações dos modelos treinados.
+
+**Observação:** certifique-se de que os arquivos de dados necessários estejam disponíveis nos diretórios esperados pelo projeto antes da execução.
 
 ## Limitações e próximos passos
 
