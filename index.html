@@ -1,11 +1,1667 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NetPulse: do ping ao alerta de rede</title>
+  <meta name="description"
+    content="Artigo do projeto acadêmico NetPulse, do Grupo 2: medições reais do RIPE Atlas, Árvore de Decisão e Random Forest para classificar a condição futura de fluxos de rede em OK, RISCO e FALHA.">
+  <meta name="theme-color" content="#0b1c30">
+  <link rel="icon" type="image/png" href="assets/assets/images/Logo_NetPulse.png">
+  <script>document.documentElement.classList.add("js");</script>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/script.js" defer></script>
 </head>
+
 <body>
-    <p>Em breve artigo do projeto da NetPulse</p>
+  <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+  <div class="progress" aria-hidden="true"><span class="progress__bar" id="progress-bar"></span></div>
+
+  <!-- ===== Cabeçalho ===== -->
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="#topo" aria-label="NetPulse, voltar ao início do artigo">
+        <!-- Recorte CSS da logo oficial: mostra apenas o ícone "N" -->
+        <span class="brand__mark"><img src="assets/images/Logo_NetPulse.png" alt="" width="1024" height="1024"></span>
+        <span class="brand__text">
+          <span class="brand__name">NetPulse</span>
+          <span class="brand__tag">Artigo do projeto acadêmico</span>
+        </span>
+      </a>
+      <button class="menu-toggle" id="menu-toggle" type="button" aria-expanded="false" aria-controls="toc">
+        <span class="menu-toggle__icon" aria-hidden="true"></span>
+        <span>Seções</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="conteudo">
+
+    <!-- ===== Hero ===== -->
+    <section class="hero" id="topo" aria-labelledby="titulo-artigo">
+      <div class="hero__inner">
+        <div class="hero__text">
+          <p class="hero__kicker">Projeto interdisciplinar do Grupo 2</p>
+          <h1 id="titulo-artigo">NetPulse: do ping ao alerta de rede</h1>
+          <p class="hero__deck">Como aprender o comportamento normal de cada fluxo de rede ajuda a classificar, com 12
+            minutos de antecedência, se ele estará em OK, RISCO ou FALHA.</p>
+          <p class="hero__meta">Estrutura de Dados II, Redes de Computadores e Análise e Projeto de Sistemas</p>
+          <a class="button" href="#introducao">Começar a leitura</a>
+        </div>
+        <div class="hero__logo">
+          <img src="assets/images/Logo_NetPulse.png"
+            alt="Logo oficial do NetPulse: letra N com uma linha de pulso e ondas de sinal, e o lema Preditor de falhas na rede"
+            width="1024" height="1024">
+        </div>
+      </div>
+      <!-- Linha de pulso decorativa (animação discreta, desativada com prefers-reduced-motion) -->
+      <svg class="hero__pulse" viewBox="0 0 1200 80" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path class="hero__pulse-line" pathLength="1"
+          d="M0 40 H300 L330 40 L350 10 L380 70 L405 25 L425 40 H700 L725 40 L745 14 L772 68 L796 28 L815 40 H1200" />
+      </svg>
+    </section>
+
+    <div class="layout">
+
+      <!-- ===== Menu de navegação / sumário ===== -->
+      <nav class="toc" id="toc" aria-label="Seções do artigo">
+        <p class="toc__title">Neste artigo</p>
+        <ol class="toc__list">
+          <li><a href="#introducao">Introdução</a></li>
+          <li><a href="#problema">O problema</a></li>
+          <li><a href="#dados">Origem e tratamento dos dados</a></li>
+          <li><a href="#sistema">Como funciona o sistema</a></li>
+          <li><a href="#modelos">Os modelos de Machine Learning</a></li>
+          <li><a href="#resultados">Resultados e comparação</a></li>
+          <li><a href="#melhor-modelo">Destaque: melhor modelo</a></li>
+          <li><a href="#api">Como utilizar a API</a></li>
+          <li><a href="#limitacoes">Limitações e próximos passos</a></li>
+          <li><a href="#conclusao">Conclusão</a></li>
+          <li><a href="#referencias">Referências</a></li>
+        </ol>
+        <p class="toc__extra"><a href="#equipe">Desenvolvido pelo Grupo 2</a></p>
+      </nav>
+
+      <article class="article">
+
+        <!-- ============ 1. INTRODUÇÃO ============ -->
+        <section class="section" id="introducao" aria-labelledby="h-introducao">
+          <h2 id="h-introducao"><span class="sec-num">1</span> Introdução: do ping ao alerta de rede</h2>
+
+          <p class="lead">Todo mundo já sentiu a internet “ficar lenta”. Para quem cuida de uma rede, a pergunta é mais
+            difícil: lenta em relação a quê?</p>
+
+          <p>O NetPulse é um sistema de monitoramento e predição de falhas em redes. Ele usa medições reais de
+            <em>ping</em>, coletadas na plataforma RIPE Atlas, e modelos de Machine Learning (Árvore de Decisão e Random
+            Forest) para classificar a condição futura de cada fluxo de rede em <strong>OK</strong>,
+            <strong>RISCO</strong> ou <strong>FALHA</strong>.
+          </p>
+
+          <p>Um <strong>fluxo</strong> é o caminho entre uma <em>probe</em> de origem, que realiza as medições, e um
+            <em>anchor</em> de destino, que é o ponto medido. O <em>ping</em> mede o RTT (<em>round-trip time</em>), o
+            tempo de ida e volta de um pacote, em milissegundos.
+          </p>
+
+          <h3>O problema de olhar só a latência absoluta</h3>
+          <p>Imagine dois trajetos: ir até a padaria leva 5 minutos e viajar entre duas cidades leva 2 horas. Se o seu
+            alarme dispara sempre que o trajeto passa de 30 minutos, ele vai apitar o tempo todo na viagem longa, onde
+            isso é perfeitamente normal.</p>
+          <p>Com redes acontece o mesmo. Nos dados do projeto, a latência típica (a mediana) dos 30 fluxos vai de 24,8
+            ms a 404,4 ms. Um alerta fixo do tipo “RTT acima de 100 ms” ficaria disparado quase o tempo todo no fluxo de
+            404 ms. Em tese, ele também poderia deixar passar um aumento importante em um fluxo curto, que ainda
+            estivesse abaixo de 100 ms.</p>
+
+          <aside class="callout callout--idea" aria-label="Ideia central">
+            <p class="callout__title">A ideia central</p>
+            <p>Em vez de perguntar “a latência está alta?”, o NetPulse pergunta “a latência está alta <em>para este
+                fluxo</em>?”. Para responder, cada fluxo ganha um <strong>baseline</strong>: a descrição do seu
+              comportamento normal, calculada com uma semana de medições.</p>
+          </aside>
+
+          <figure class="figure" id="fig-intro">
+            <p class="figure__title">Figura 1. O “normal” de cada fluxo é muito diferente</p>
+            <div class="figure__body" id="chart-intro" role="img"
+              aria-label="Gráfico de barras horizontais com a menor e a maior mediana de RTT entre os 30 fluxos: 24,8 ms e 404,4 ms, com uma linha de referência em 100 ms.">
+            </div>
+            <figcaption>Como ler: as barras mostram a menor e a maior latência típica (mediana) entre os 30 fluxos do
+              projeto. A linha tracejada marca 100 ms, um limite fixo hipotético. Um limite único não serve para os dois
+              fluxos ao mesmo tempo.</figcaption>
+          </figure>
+
+          <p>Um exemplo real do Período B: uma medição de 430,6 ms em um fluxo cuja mediana é 404,4 ms está apenas 6,48%
+            acima do normal daquele fluxo. Ela foi classificada como OK, apesar do RTT alto.</p>
+
+          <h3>Objetivos do projeto</h3>
+          <ul class="checklist">
+            <li>Coletar e processar medições de rede.</li>
+            <li>Preparar e rotular datasets para modelagem.</li>
+            <li>Treinar e avaliar modelos de Árvore de Decisão e Random Forest.</li>
+            <li>Classificar condições futuras dos fluxos em OK, RISCO e FALHA.</li>
+          </ul>
+
+          <p>Nas próximas seções, vamos ver o problema com mais detalhe, de onde vêm os dados, como o sistema é
+            organizado, como os modelos funcionam e o que os experimentos mostraram, inclusive onde o projeto ainda
+            erra.</p>
+        </section>
+
+        <!-- ============ 2. O PROBLEMA ============ -->
+        <section class="section" id="problema" aria-labelledby="h-problema">
+          <h2 id="h-problema"><span class="sec-num">2</span> O problema que queremos resolver</h2>
+
+          <p>Quatro situações diferentes costumam ser confundidas sob o rótulo “a rede está ruim”. Separá-las é o
+            primeiro passo para criar alertas úteis.</p>
+
+          <dl class="concepts">
+            <div class="concept">
+              <dt>Latência estrutural</dt>
+              <dd>É o tempo de resposta normal de um fluxo, determinado principalmente pelo caminho e pela distância. No
+                NetPulse, ela é representada pela mediana do baseline. Uma latência alta, mas estável, não é problema.
+              </dd>
+            </div>
+            <div class="concept">
+              <dt>Degradação</dt>
+              <dd>É a piora em relação ao normal <em>daquele</em> fluxo: RTT bem acima da mediana, jitter elevado ou
+                perdas. É o que o sistema procura identificar.</dd>
+            </div>
+            <div class="concept">
+              <dt>Indisponibilidade</dt>
+              <dd>É a ausência de resposta: pacotes perdidos ou <em>timeouts</em> repetidos. Nos dados, uma medição sem
+                RTT válido é registrada como timeout, nunca como 0 ms.</dd>
+            </div>
+            <div class="concept">
+              <dt>Mudança de rota</dt>
+              <dd>Acontece quando o caminho muda e, com ele, a latência normal. O NetPulse não usa a rota como atributo
+                e o baseline é fixo, então uma troca de rota não é acompanhada pelo sistema (veja as limitações).</dd>
+            </div>
+          </dl>
+
+          <h3>Os três estados do sistema</h3>
+          <div class="states">
+            <article class="state state--ok">
+              <h4>OK</h4>
+              <p>Comportamento compatível com o normal do fluxo. Até um pico isolado ainda é OK.</p>
+            </article>
+            <article class="state state--risco">
+              <h4>RISCO</h4>
+              <p>Degradação relevante e persistente: sinais de desvio que se repetem nas últimas medições.</p>
+            </article>
+            <article class="state state--falha">
+              <h4>FALHA</h4>
+              <p>Desvio extremo, perda elevada ou ausência de resposta.</p>
+            </article>
+          </div>
+
+          <h3>Como cada estado é definido</h3>
+          <p>As regras são aplicadas em ordem e a primeira verdadeira decide a classe. FALHA vence RISCO, e RISCO vence
+            OK. Nenhuma regra usa país, IP, nome da rota ou um RTT fixo em milissegundos.</p>
+
+          <div class="table-wrap">
+            <table class="table">
+              <caption>Tabela 1. Regras de rotulagem (conforme documentação do projeto)</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Ordem</th>
+                  <th scope="col">Classe</th>
+                  <th scope="col">Condição</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>1</td>
+                  <td><span class="tag tag--falha">FALHA</span></td>
+                  <td>Perda de pacotes de 10% ou mais na medição</td>
+                </tr>
+                <tr>
+                  <td>2</td>
+                  <td><span class="tag tag--falha">FALHA</span></td>
+                  <td>3 ou mais timeouts nas últimas 5 medições</td>
+                </tr>
+                <tr>
+                  <td>3</td>
+                  <td><span class="tag tag--falha">FALHA</span></td>
+                  <td>Desvio robusto (<code>z_robusto</code>) de 3,5 ou mais, com RTT presente</td>
+                </tr>
+                <tr>
+                  <td>4</td>
+                  <td><span class="tag tag--falha">FALHA</span></td>
+                  <td>2 ou mais das últimas 5 medições com aumento de RTT acima de 80%</td>
+                </tr>
+                <tr>
+                  <td>5</td>
+                  <td><span class="tag tag--risco">RISCO</span></td>
+                  <td>Na medição atual, pelo menos um destes sinais: <code>z_robusto</code> entre 2 e 3,5; aumento de
+                    RTT entre 30% e 80%; ou jitter relativo de 3 ou mais. E, ao mesmo tempo, 2 ou mais das últimas 5
+                    medições com algum sinal de risco</td>
+                </tr>
+                <tr>
+                  <td>6</td>
+                  <td><span class="tag tag--ok">OK</span></td>
+                  <td>Nenhuma regra anterior se aplica</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Três exemplos reais</h3>
+          <p>A documentação do projeto traz três medições reais do Período B que mostram como as regras funcionam.</p>
+          <div class="table-wrap">
+            <table class="table table--compact">
+              <caption>Tabela 2. Exemplos auditáveis de rotulagem</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Classe</th>
+                  <th scope="col">Medição</th>
+                  <th scope="col">Por que recebeu essa classe</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="tag tag--ok">OK</span></td>
+                  <td>RTT de 430,6 ms; mediana do fluxo de 404,4 ms; <code>z_robusto</code> 1,76; aumento de 6,48%</td>
+                  <td>Apesar do RTT alto, o desvio é pequeno para esse fluxo e nenhuma regra de alerta foi satisfeita.
+                  </td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag--risco">RISCO</span></td>
+                  <td>RTT de 65,6 ms; jitter relativo de 3,60; <code>n5_risco</code> igual a 2</td>
+                  <td>O jitter está 3,6 vezes acima do típico e pelo menos duas das últimas cinco medições tinham sinal
+                    de risco.</td>
+                </tr>
+                <tr>
+                  <td><span class="tag tag--falha">FALHA</span></td>
+                  <td>Sem RTT válido; perda de 100%</td>
+                  <td>A primeira regra de FALHA (perda de 10% ou mais) já foi satisfeita.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Quem pode usar os alertas?</h3>
+          <p>O cenário de uso envolve a equipe de ADS (análise e desenvolvimento de sistemas), que recebeu o modelo
+            treinado e salvo em formato <strong>.joblib</strong> para
+            utilizá-lo em um aplicativo. Por meio dessa integração, o aplicativo poderá receber os dados da rede e
+            utilizar o modelo para classificar os fluxos como OK, RISCO ou FALHA. Dessa forma, a equipe de ADS (análise
+            e desenvolvimento de sistemas) poderá
+            apresentar os resultados ao usuário, permitindo identificar situações que exigem atenção e auxiliar na
+            tomada de decisões, como investigar possíveis problemas de conexão ou priorizar a análise de fluxos com
+            maior risco.</p>
+        </section>
+
+        <!-- ============ 3. DADOS ============ -->
+        <section class="section" id="dados" aria-labelledby="h-dados">
+          <h2 id="h-dados"><span class="sec-num">3</span> Origem e tratamento dos dados</h2>
+
+          <h3>De onde vêm as medições</h3>
+          <p>Os dados vêm da API do <strong>RIPE Atlas</strong>, uma plataforma pública de medições de rede. O grupo
+            avaliou duas opções, um dataset já publicado ou a API do RIPE Atlas, e escolheu a API pelo maior controle
+            sobre a coleta e pela possibilidade de selecionar probes de origens diferentes.</p>
+
+          <div class="stats" role="list">
+            <div class="stat" role="listitem"><span class="stat__value">7</span><span class="stat__label">anchors de
+                destino</span></div>
+            <div class="stat" role="listitem"><span class="stat__value">22</span><span class="stat__label">probes de
+                origem</span></div>
+            <div class="stat" role="listitem"><span class="stat__value">30</span><span class="stat__label">fluxos (pares
+                probe e anchor)</span></div>
+            <div class="stat" role="listitem"><span class="stat__value">75.042</span><span class="stat__label">medições
+                rotuladas para modelagem</span></div>
+            <div class="stat" role="listitem"><span class="stat__value">12 min</span><span class="stat__label">horizonte
+                de previsão</span></div>
+          </div>
+
+          <h3>Coleta das medições</h3>
+          <p>Cada medição é um <em>ping</em> ICMP de 3 pacotes, repetido a cada 240 segundos (4 minutos). A coleta cobre
+            duas semanas consecutivas e sem sobreposição:</p>
+          <ul>
+            <li><strong>Período A</strong> (24/09 a 01/10/2026): 75.157 medições, usadas para descobrir o comportamento
+              normal de cada fluxo.</li>
+            <li><strong>Período B</strong> (01/10 a 08/10/2026): 75.148 medições, usadas para rotular e treinar os
+              modelos.</li>
+          </ul>
+          <p>As distâncias entre probe e anchor foram calculadas pela fórmula de Haversine e classificadas em
+            <strong>curta</strong> (menos de 1.000 km), <strong>média</strong> (de 1.000 a 5.000 km) e
+            <strong>longa</strong> (mais de 5.000 km). Dos 30 fluxos, 21 são longos, 4 médios e 5 curtos.
+          </p>
+
+          <figure class="figure" id="fig-linha-tempo">
+            <p class="figure__title">Figura 2. Duas semanas, dois papéis</p>
+            <div class="timeline" role="img"
+              aria-label="Linha do tempo: Período A, de 24 de setembro a 1 de outubro de 2026, usado para o baseline; Período B, de 1 a 8 de outubro de 2026, usado para rotular e treinar.">
+              <div class="timeline__block timeline__block--a">
+                <strong>Período A</strong>
+                <span>24/09 a 01/10/2026</span>
+                <span>Constrói o baseline de cada fluxo</span>
+              </div>
+              <div class="timeline__block timeline__block--b">
+                <strong>Período B</strong>
+                <span>01/10 a 08/10/2026</span>
+                <span>Medições rotuladas e usadas no treino, validação e teste</span>
+              </div>
+            </div>
+            <figcaption>Como ler: o baseline nunca usa dados do Período B. Assim, o “normal” de cada fluxo é definido
+              antes de as medições a serem classificadas existirem.</figcaption>
+          </figure>
+
+          <h3>Variáveis disponíveis</h3>
+          <div class="table-wrap">
+            <table class="table table--compact">
+              <caption>Tabela 3. Informações de cada medição e como aparecem nos dados</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Informação</th>
+                  <th scope="col">Como aparece</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Latência</td>
+                  <td>RTT de cada pacote (<code>result</code>) e RTT médio da medição (<code>avg</code>), em ms</td>
+                </tr>
+                <tr>
+                  <td>Perda</td>
+                  <td>Pacotes enviados (<code>sent</code>) e recebidos (<code>rcvd</code>); a perda em % é calculada a
+                    partir deles</td>
+                </tr>
+                <tr>
+                  <td>Disponibilidade</td>
+                  <td>Medição sem RTT válido (<code>avg</code> igual a -1) é tratada como timeout; no baseline, a
+                    proporção de respostas de cada fluxo é registrada</td>
+                </tr>
+                <tr>
+                  <td>Jitter</td>
+                  <td>Não vem pronto da API: é calculado como a média das diferenças absolutas entre RTTs consecutivos
+                    da própria medição</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Limpeza e tratamento</h3>
+          <ul>
+            <li>Medições sem RTT válido representam 0,12% do Período A e 0,07% do Período B. Elas <strong>nunca</strong>
+              são gravadas como 0 ms: ficam fora da mediana e da variação do baseline, mas permanecem no dataset como
+              eventos de timeout.</li>
+            <li>Um fluxo só recebe baseline se tiver pelo menos 1.500 RTTs válidos no Período A. Os 30 fluxos atenderam
+              ao critério (entre 2.430 e 2.518 RTTs válidos por fluxo), e nenhum foi excluído.</li>
+            <li>Os dados brutos ficam em <code>data/raw</code> e não são alterados; os arquivos de trabalho ficam em
+              <code>data/interim</code>.
+            </li>
+          </ul>
+
+          <h3>O baseline: o “normal” de cada fluxo</h3>
+          <p>Para cada fluxo, o Período A gera uma ficha com cinco números:</p>
+          <ul>
+            <li><strong>Mediana</strong> do RTT: a latência típica do fluxo.</li>
+            <li><strong>MAD</strong> (desvio absoluto mediano): o quanto o RTT costuma variar, de um jeito pouco
+              sensível a picos. O baseline também guarda o IQR, outra medida de variação.</li>
+            <li><strong>Jitter típico</strong>: a variação habitual entre pacotes.</li>
+            <li><strong>Perda típica</strong>: 0% em todos os 30 fluxos.</li>
+            <li><strong>Proporção de resposta</strong>: o quanto o fluxo costuma responder.</li>
+          </ul>
+
+          <figure class="figure" id="fig-medianas">
+            <p class="figure__title">Figura 3. Mediana de RTT de cada um dos 30 fluxos (Período A)</p>
+            <div class="figure__body" id="chart-medianas" role="img"
+              aria-label="Gráfico de barras com a mediana de RTT, em milissegundos, dos 30 fluxos do baseline, variando de 24,8 a 404,4 ms.">
+            </div>
+            <figcaption>Como ler: cada barra é um fluxo, ordenado da menor para a maior latência típica. As diferenças
+              enormes entre fluxos mostram por que o projeto usa informações relativas ao comportamento normal de cada
+              um.</figcaption>
+          </figure>
+
+          <h3>Engenharia de atributos</h3>
+          <p>Para cada medição do Período B, o sistema compara o valor atual com a ficha do fluxo e com as últimas
+            medições dele. Os nove atributos usados pelos modelos são todos relativos ao comportamento normal ou à
+            história recente do fluxo:</p>
+          <div class="table-wrap">
+            <table class="table table--compact">
+              <caption>Tabela 4. Atributos usados pelos modelos</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Atributo</th>
+                  <th scope="col">O que significa</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>perda_pct</code></td>
+                  <td>Percentual de pacotes sem resposta na medição</td>
+                </tr>
+                <tr>
+                  <td><code>aumento_pct</code></td>
+                  <td>Quanto o RTT atual está acima ou abaixo da mediana do fluxo, em %</td>
+                </tr>
+                <tr>
+                  <td><code>z_robusto</code></td>
+                  <td>Distância do RTT atual à mediana, em unidades da variação normal do fluxo: (RTT − mediana) ÷
+                    (1,4826 × MAD)</td>
+                </tr>
+                <tr>
+                  <td><code>jitter_atual</code></td>
+                  <td>Jitter da medição atual, em ms</td>
+                </tr>
+                <tr>
+                  <td><code>jitter_relativo</code></td>
+                  <td>Jitter atual dividido pelo jitter típico do fluxo</td>
+                </tr>
+                <tr>
+                  <td><code>timeout_atual</code></td>
+                  <td>1 se não houve RTT válido (ou a perda foi de 100%), senão 0</td>
+                </tr>
+                <tr>
+                  <td><code>n5_timeout</code></td>
+                  <td>Quantidade de timeouts nas últimas 5 medições do fluxo</td>
+                </tr>
+                <tr>
+                  <td><code>n5_aumento80</code></td>
+                  <td>Quantas das últimas 5 medições tiveram aumento de RTT acima de 80%</td>
+                </tr>
+                <tr>
+                  <td><code>n5_risco</code></td>
+                  <td>Quantas das últimas 5 medições atendem a pelo menos um critério de risco</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p>País, endereço IP, identificadores de fluxo e o RTT absoluto ficam <strong>fora</strong> dos atributos,
+            para que o modelo não aprenda apenas que “fluxo longo tem latência alta”.</p>
+
+          <h3>Separação entre baseline e dataset de treino</h3>
+          <ol>
+            <li>O <strong>Período A</strong> gera o baseline e é congelado.</li>
+            <li>As medições do <strong>Período B</strong> recebem as métricas relativas e um rótulo (OK, RISCO ou FALHA)
+              pelas regras da Tabela 1.</li>
+            <li>O rótulo é <strong>deslocado 12 minutos</strong>: o alvo de cada medição é a classe da primeira medição
+              do mesmo fluxo que ocorre 12 minutos ou mais depois. Medições sem uma medição futura correspondente são
+              removidas. Esse deslocamento é o que transforma o problema em previsão. Antes dele, o modelo via a própria
+              classe e a acurácia chegava a 100%, o que invalidava a avaliação.</li>
+            <li>Os fluxos são divididos em <strong>20 para treino, 5 para validação e 5 para teste</strong>, sorteados
+              com semente 42 e distribuídos de forma proporcional às categorias de distância. Cada fluxo pertence a um
+              único conjunto, o que reduz o risco de vazamento de dados.</li>
+          </ol>
+
+          <figure class="figure" id="fig-classes">
+            <p class="figure__title">Figura 4. Distribuição das classes-alvo em cada conjunto</p>
+            <div class="figure__body" id="chart-classes" role="img"
+              aria-label="Barras empilhadas com a proporção de OK, RISCO e FALHA nos conjuntos de treino, validação e teste.">
+            </div>
+            <figcaption>Como ler: cada barra soma 100% dos registros do conjunto. OK domina em todos, e RISCO é a classe
+              mais rara. Como a divisão é por fluxo, o teste tem proporcionalmente mais FALHA (29,7%) que o treino
+              (11,8%).</figcaption>
+          </figure>
+
+          <aside class="callout" aria-label="Por que usar o comportamento normal">
+            <p class="callout__title">Por que informações relativas?</p>
+            <p>Porque o mesmo RTT pode ser normal em um fluxo e um problema em outro. Ao medir cada medição contra o
+              baseline do próprio fluxo, o modelo passa a avaliar “o quanto isso foge do habitual” e não “o quão grande
+              é esse número”.</p>
+          </aside>
+        </section>
+
+        <!-- ============ 4. SISTEMA ============ -->
+        <section class="section" id="sistema" aria-labelledby="h-sistema">
+          <h2 id="h-sistema"><span class="sec-num">4</span> Como funciona o sistema</h2>
+
+          <p>O NetPulse é um pipeline: uma sequência de etapas em que a saída de uma é a entrada da próxima. Para
+            explicá-lo, organizamos as etapas do repositório em três camadas.</p>
+
+          <div class="layers">
+            <article class="layer layer--1">
+              <h3>Camada 1: Coleta e engenharia</h3>
+              <p>Scripts em Python consultam a API do RIPE Atlas, guardam as respostas em cache e geram
+                <code>period_a.csv</code>, <code>period_b.csv</code> e os metadados dos pares probe e anchor, com a
+                classificação de distância.
+              </p>
+            </article>
+            <article class="layer layer--2">
+              <h3>Camada 2: Baseline e atributos</h3>
+              <p>O Período A gera o baseline de cada fluxo. O Período B recebe as métricas relativas e os rótulos, o
+                rótulo é deslocado 12 minutos e os fluxos são divididos em treino, validação e teste.</p>
+            </article>
+            <article class="layer layer--3">
+              <h3>Camada 3: Modelagem</h3>
+              <p>A Árvore de Decisão e o Random Forest são treinados com busca de hiperparâmetros, avaliados no teste e
+                salvos em arquivos <code>.joblib</code>, com metadados em JSON.</p>
+            </article>
+          </div>
+
+          <figure class="figure figure--wide" id="fig-arquitetura">
+            <p class="figure__title">Figura 5. Do ping à classe prevista</p>
+            <div class="figure__scroll">
+              <svg class="diagram diagram--arch" viewBox="0 0 1000 500" role="img"
+                aria-labelledby="arch-title arch-desc">
+                <title id="arch-title">Arquitetura do NetPulse em três camadas</title>
+                <desc id="arch-desc">A API do RIPE Atlas gera os arquivos do Período A e do Período B. O Período A gera
+                  o baseline; o Período B recebe métricas e rótulos, o rótulo é deslocado 12 minutos e os fluxos são
+                  divididos em treino, validação e teste. A Árvore de Decisão e o Random Forest são treinados, salvos em
+                  arquivos joblib e produzem a classe prevista: OK, RISCO ou FALHA.</desc>
+                <defs>
+                  <marker id="seta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7"
+                    orient="auto-start-reverse">
+                    <path d="M0 0 L10 5 L0 10 z" class="d-arrowhead" />
+                  </marker>
+                </defs>
+
+                <!-- Camada 1 -->
+                <rect class="d-layer d-layer--1" x="10" y="10" width="300" height="480" rx="14" />
+                <text class="d-title" x="160" y="40" text-anchor="middle">Camada 1</text>
+                <text class="d-subtitle" x="160" y="60" text-anchor="middle">Coleta e engenharia</text>
+
+                <rect class="d-box" x="30" y="85" width="260" height="70" rx="10" />
+                <text class="d-label" x="160" y="115" text-anchor="middle">API RIPE Atlas</text>
+                <text class="d-small" x="160" y="136" text-anchor="middle">medições de ping (ICMP)</text>
+
+                <rect class="d-box" x="30" y="195" width="260" height="100" rx="10" />
+                <text class="d-label" x="160" y="228" text-anchor="middle">period_a.csv</text>
+                <text class="d-label" x="160" y="250" text-anchor="middle">period_b.csv</text>
+                <text class="d-small" x="160" y="276" text-anchor="middle">duas semanas consecutivas</text>
+
+                <rect class="d-box" x="30" y="345" width="260" height="70" rx="10" />
+                <text class="d-label" x="160" y="375" text-anchor="middle">pairs_metadata.csv</text>
+                <text class="d-small" x="160" y="396" text-anchor="middle">distância: curta, média ou longa</text>
+
+                <path class="d-arrow" d="M160 155 V195" marker-end="url(#seta)" />
+
+                <!-- Camada 2 -->
+                <rect class="d-layer d-layer--2" x="350" y="10" width="300" height="480" rx="14" />
+                <text class="d-title" x="500" y="40" text-anchor="middle">Camada 2</text>
+                <text class="d-subtitle" x="500" y="60" text-anchor="middle">Baseline e atributos</text>
+
+                <rect class="d-box" x="370" y="85" width="260" height="70" rx="10" />
+                <text class="d-label" x="500" y="113" text-anchor="middle">Baseline por fluxo</text>
+                <text class="d-small" x="500" y="135" text-anchor="middle">mediana, MAD, jitter típico (Período
+                  A)</text>
+
+                <rect class="d-box" x="370" y="185" width="260" height="70" rx="10" />
+                <text class="d-label" x="500" y="213" text-anchor="middle">Métricas relativas e rótulos</text>
+                <text class="d-small" x="500" y="235" text-anchor="middle">OK, RISCO ou FALHA (Período B)</text>
+
+                <rect class="d-box" x="370" y="285" width="260" height="70" rx="10" />
+                <text class="d-label" x="500" y="313" text-anchor="middle">Deslocamento de 12 minutos</text>
+                <text class="d-small" x="500" y="335" text-anchor="middle">alvo: a classe futura</text>
+
+                <rect class="d-box" x="370" y="385" width="260" height="85" rx="10" />
+                <text class="d-label" x="500" y="413" text-anchor="middle">Divisão por fluxo</text>
+                <text class="d-small" x="500" y="434" text-anchor="middle">20 treino, 5 validação, 5 teste</text>
+                <text class="d-small" x="500" y="454" text-anchor="middle">period_b_split.csv</text>
+
+                <path class="d-arrow" d="M500 155 V185" marker-end="url(#seta)" />
+                <path class="d-arrow" d="M500 255 V285" marker-end="url(#seta)" />
+                <path class="d-arrow" d="M500 355 V385" marker-end="url(#seta)" />
+
+                <!-- Camada 1 -> 2 -->
+                <path class="d-arrow" d="M290 245 C330 245 330 120 370 120" marker-end="url(#seta)" />
+                <path class="d-arrow" d="M290 245 C330 245 330 220 370 220" marker-end="url(#seta)" />
+                <path class="d-arrow d-arrow--soft" d="M290 380 C330 380 330 420 370 420" marker-end="url(#seta)" />
+
+                <!-- Camada 3 -->
+                <rect class="d-layer d-layer--3" x="690" y="10" width="300" height="480" rx="14" />
+                <text class="d-title" x="840" y="40" text-anchor="middle">Camada 3</text>
+                <text class="d-subtitle" x="840" y="60" text-anchor="middle">Modelagem</text>
+
+                <rect class="d-box" x="710" y="85" width="260" height="60" rx="10" />
+                <text class="d-label" x="840" y="121" text-anchor="middle">Árvore de Decisão</text>
+
+                <rect class="d-box" x="710" y="170" width="260" height="60" rx="10" />
+                <text class="d-label" x="840" y="206" text-anchor="middle">Random Forest</text>
+
+                <rect class="d-box" x="710" y="270" width="260" height="70" rx="10" />
+                <text class="d-label" x="840" y="298" text-anchor="middle">Modelos salvos</text>
+                <text class="d-small" x="840" y="320" text-anchor="middle">arquivos .joblib e metadados .json</text>
+
+                <rect class="d-box d-box--final" x="710" y="380" width="260" height="80" rx="10" />
+                <text class="d-label" x="840" y="412" text-anchor="middle">Classe prevista</text>
+                <text class="d-small" x="840" y="436" text-anchor="middle">OK, RISCO ou FALHA em 12 min</text>
+
+                <path class="d-arrow" d="M630 428 C670 428 670 115 710 115" marker-end="url(#seta)" />
+                <path class="d-arrow" d="M630 428 C670 428 670 200 710 200" marker-end="url(#seta)" />
+                <path class="d-arrow" d="M970 115 C990 115 990 305 970 305" marker-end="url(#seta)" />
+                <path class="d-arrow" d="M970 200 C985 200 985 305 970 305" />
+                <path class="d-arrow" d="M840 340 V380" marker-end="url(#seta)" />
+              </svg>
+            </div>
+            <figcaption>Como ler: as setas mostram o caminho dos dados, da esquerda para a direita. Os três blocos do
+              diagrama original do repositório (Fonte, Preparação e rotulagem, e Treinamento dos modelos) foram
+              reorganizados nas três camadas deste artigo, sem acrescentar etapas.</figcaption>
+          </figure>
+
+          <details class="details">
+            <summary>Ver o diagrama original do repositório</summary>
+            <figure class="figure">
+              <img class="figure__img" src="assets/images/arquitetura_pipeline.png"
+                alt="Diagrama original do pipeline do NetPulse, com os blocos Fonte, Preparação e rotulagem, Treinamento dos modelos e Artefatos finais."
+                width="1456" height="816" loading="lazy">
+              <figcaption>Diagrama de arquitetura do repositório do projeto.</figcaption>
+            </figure>
+          </details>
+
+          <p>O repositório tem três orquestradores (<code>etl_data_collection.py</code>,
+            <code>etl_data_labeling.py</code> e <code>etl_data_model.py</code>), chamados em sequência pelo
+            <code>main.py</code>. Depois do treino, os modelos salvos podem ser carregados para classificar novas
+            medições sem treinar de novo.
+          </p>
+        </section>
+
+        <!-- ============ 5. MODELOS ============ -->
+        <section class="section" id="modelos" aria-labelledby="h-modelos">
+          <h2 id="h-modelos"><span class="sec-num">5</span> Os modelos de Machine Learning</h2>
+
+          <p>Um modelo de classificação aprende com exemplos que já têm a resposta. Aqui, cada exemplo é uma medição de
+            rede (os nove atributos da Tabela 4), e a resposta é a classe 12 minutos depois: OK, RISCO ou FALHA. Depois
+            de treinado, o modelo recebe uma medição nova e prevê a classe.</p>
+          <p>Três abordagens aparecem no artigo. A primeira é uma regra de referência, calculada para comparação, e as
+            outras duas são os modelos treinados pelo projeto.</p>
+
+          <aside class="callout" aria-label="Dois sentidos da palavra baseline">
+            <p class="callout__title">Atenção: “baseline” tem dois sentidos neste projeto</p>
+            <p>O <em>baseline de cada fluxo</em> (Seção 3) é a ficha estatística do comportamento normal. Já o
+              <em>baseline de comparação</em>, desta seção, é uma regra simples usada como ponto de partida para saber
+              se um modelo realmente agrega algo.
+            </p>
+          </aside>
+
+          <!-- ---- Regra de referência ---- -->
+          <article class="model" id="modelo-referencia">
+            <h3>Baseline de comparação: repetir a classe atual</h3>
+            <p class="model__tag">Cálculo feito a partir do <code>period_b_split.csv</code>, no conjunto de teste; não é
+              um modelo treinado.</p>
+            <figure class="figure figure--inline">
+              <svg class="diagram diagram--small" viewBox="0 0 640 140" role="img" aria-labelledby="ref-title">
+                <title id="ref-title">Regra de referência: a previsão para daqui a 12 minutos é igual à classe atual
+                </title>
+                <rect class="d-box" x="20" y="35" width="240" height="70" rx="10" />
+                <text class="d-label" x="140" y="65" text-anchor="middle">Medição agora</text>
+                <text class="d-small" x="140" y="88" text-anchor="middle">classe atual: RISCO</text>
+                <path class="d-arrow" d="M260 70 H380" marker-end="url(#seta)" />
+                <text class="d-small" x="320" y="60" text-anchor="middle">copia</text>
+                <rect class="d-box d-box--final" x="380" y="35" width="240" height="70" rx="10" />
+                <text class="d-label" x="500" y="65" text-anchor="middle">Previsão em 12 min</text>
+                <text class="d-small" x="500" y="88" text-anchor="middle">classe prevista: RISCO</text>
+              </svg>
+              <figcaption>Figura 6. A regra de referência apenas repete o estado de agora.</figcaption>
+            </figure>
+            <dl class="model__grid">
+              <div>
+                <dt>Conceito</dt>
+                <dd>Uma previsão “sem inteligência”: se o fluxo está em RISCO agora, prevê RISCO daqui a 12 minutos.
+                </dd>
+              </div>
+              <div>
+                <dt>Como funciona</dt>
+                <dd>Compara a classe atual de cada medição com a classe futura real. Não aprende nada nem usa os
+                  atributos.</dd>
+              </div>
+              <div>
+                <dt>Exemplo simples</dt>
+                <dd>Se um fluxo está em OK agora, a regra prevê OK. Ela só erra quando o estado muda dentro dos 12
+                  minutos.</dd>
+              </div>
+              <div>
+                <dt>Vantagens</dt>
+                <dd>É simples e dispensa treinamento. Serve de régua: um modelo só vale a pena se superar, ou
+                  complementar, essa regra.</dd>
+              </div>
+              <div>
+                <dt>Limitações</dt>
+                <dd>Por definição, nunca antecipa uma mudança de estado, e precisa que a classe atual já tenha sido
+                  calculada pelas regras de rotulagem.</dd>
+              </div>
+              <div>
+                <dt>Aplicação no NetPulse</dt>
+                <dd>Ponto de comparação nos resultados (Seção 6).</dd>
+              </div>
+            </dl>
+          </article>
+
+          <!-- ---- Árvore de Decisão ---- -->
+          <article class="model" id="modelo-arvore">
+            <h3>Árvore de Decisão</h3>
+            <figure class="figure figure--inline">
+              <svg class="diagram diagram--tree" viewBox="0 0 640 300" role="img"
+                aria-labelledby="tree-title tree-desc">
+                <title id="tree-title">Exemplo ilustrativo de árvore de decisão</title>
+                <desc id="tree-desc">A árvore pergunta se o RTT está muito acima do normal do fluxo. Se não, prevê OK.
+                  Se sim, pergunta se o jitter também está alto: se sim, prevê FALHA; se não, prevê RISCO.</desc>
+                <rect class="d-box" x="190" y="15" width="260" height="56" rx="10" />
+                <text class="d-label" x="320" y="40" text-anchor="middle">O RTT está muito acima</text>
+                <text class="d-label" x="320" y="58" text-anchor="middle">do normal do fluxo?</text>
+
+                <path class="d-arrow" d="M240 71 L120 130" marker-end="url(#seta)" />
+                <text class="d-small" x="150" y="100" text-anchor="middle">não</text>
+                <path class="d-arrow" d="M400 71 L460 130" marker-end="url(#seta)" />
+                <text class="d-small" x="450" y="100" text-anchor="middle">sim</text>
+
+                <rect class="d-leaf d-leaf--ok" x="40" y="132" width="160" height="50" rx="25" />
+                <text class="d-label" x="120" y="163" text-anchor="middle">OK</text>
+
+                <rect class="d-box" x="350" y="132" width="220" height="56" rx="10" />
+                <text class="d-label" x="460" y="157" text-anchor="middle">O jitter também</text>
+                <text class="d-label" x="460" y="175" text-anchor="middle">está alto?</text>
+
+                <path class="d-arrow" d="M410 188 L350 238" marker-end="url(#seta)" />
+                <text class="d-small" x="360" y="214" text-anchor="middle">não</text>
+                <path class="d-arrow" d="M510 188 L550 238" marker-end="url(#seta)" />
+                <text class="d-small" x="548" y="214" text-anchor="middle">sim</text>
+
+                <rect class="d-leaf d-leaf--risco" x="270" y="240" width="160" height="50" rx="25" />
+                <text class="d-label" x="350" y="271" text-anchor="middle">RISCO</text>
+                <rect class="d-leaf d-leaf--falha" x="480" y="240" width="140" height="50" rx="25" />
+                <text class="d-label" x="550" y="271" text-anchor="middle">FALHA</text>
+              </svg>
+              <figcaption>Figura 7. Exemplo ilustrativo e simplificado. Não é uma regra extraída da árvore treinada do
+                projeto, e os limites reais são aprendidos dos dados.</figcaption>
+            </figure>
+            <dl class="model__grid">
+              <div>
+                <dt>Conceito</dt>
+                <dd>Um conjunto de perguntas de “sim ou não” encadeadas, como um fluxograma. Cada pergunta usa um
+                  atributo e um limite, e cada caminho termina em uma classe.</dd>
+              </div>
+              <div>
+                <dt>Como funciona</dt>
+                <dd>No treino, o algoritmo testa muitos atributos e limites e escolhe, a cada passo, a pergunta que
+                  melhor separa as classes (critério de Gini). Para prever, a medição percorre as perguntas até uma
+                  folha.</dd>
+              </div>
+              <div>
+                <dt>Exemplo simples</dt>
+                <dd>Se o RTT está muito acima do normal e o jitter também, a árvore pode prever FALHA, como na Figura 7.
+                </dd>
+              </div>
+              <div>
+                <dt>Vantagens</dt>
+                <dd>É fácil de interpretar e de explicar, e mostra quais atributos mais pesaram na decisão.</dd>
+              </div>
+              <div>
+                <dt>Limitações</dt>
+                <dd>Uma árvore sozinha pode ser instável: pequenas mudanças nos dados podem gerar uma árvore diferente.
+                  Pode também decorar o treino se ficar profunda demais.</dd>
+              </div>
+              <div>
+                <dt>Aplicação no NetPulse</dt>
+                <dd>Treinada com os nove atributos, com profundidade máxima 5, pelo menos 100 amostras por folha e pesos
+                  balanceados entre as classes, para dar mais atenção às classes raras. Na validação, obteve F1 macro de
+                  0,539.</dd>
+              </div>
+            </dl>
+          </article>
+
+          <!-- ---- Random Forest ---- -->
+          <article class="model" id="modelo-floresta">
+            <h3>Random Forest</h3>
+            <figure class="figure figure--inline">
+              <svg class="diagram diagram--forest" viewBox="0 0 640 260" role="img" aria-labelledby="rf-title rf-desc">
+                <title id="rf-title">Exemplo ilustrativo de Random Forest</title>
+                <desc id="rf-desc">Três árvores recebem a mesma medição e votam: duas preveem FALHA e uma prevê RISCO. A
+                  previsão da floresta é a classe mais votada, FALHA.</desc>
+                <g>
+                  <circle class="d-node" cx="90" cy="50" r="12" />
+                  <circle class="d-node" cx="60" cy="95" r="10" />
+                  <circle class="d-node" cx="120" cy="95" r="10" />
+                  <path class="d-line" d="M90 62 L60 85 M90 62 L120 85" />
+                  <text class="d-small" x="90" y="130" text-anchor="middle">Árvore 1</text>
+                  <rect class="d-leaf d-leaf--falha" x="45" y="145" width="90" height="34" rx="17" />
+                  <text class="d-label" x="90" y="168" text-anchor="middle">FALHA</text>
+                </g>
+                <g>
+                  <circle class="d-node" cx="240" cy="50" r="12" />
+                  <circle class="d-node" cx="210" cy="95" r="10" />
+                  <circle class="d-node" cx="270" cy="95" r="10" />
+                  <path class="d-line" d="M240 62 L210 85 M240 62 L270 85" />
+                  <text class="d-small" x="240" y="130" text-anchor="middle">Árvore 2</text>
+                  <rect class="d-leaf d-leaf--risco" x="195" y="145" width="90" height="34" rx="17" />
+                  <text class="d-label" x="240" y="168" text-anchor="middle">RISCO</text>
+                </g>
+                <g>
+                  <circle class="d-node" cx="390" cy="50" r="12" />
+                  <circle class="d-node" cx="360" cy="95" r="10" />
+                  <circle class="d-node" cx="420" cy="95" r="10" />
+                  <path class="d-line" d="M390 62 L360 85 M390 62 L420 85" />
+                  <text class="d-small" x="390" y="130" text-anchor="middle">Árvore 3</text>
+                  <rect class="d-leaf d-leaf--falha" x="345" y="145" width="90" height="34" rx="17" />
+                  <text class="d-label" x="390" y="168" text-anchor="middle">FALHA</text>
+                </g>
+                <text class="d-small" x="240" y="222" text-anchor="middle">cada árvore vota</text>
+                <path class="d-arrow" d="M440 162 H500" marker-end="url(#seta)" />
+                <rect class="d-box d-box--final" x="505" y="115" width="120" height="96" rx="10" />
+                <text class="d-small" x="565" y="148" text-anchor="middle">Votação</text>
+                <text class="d-small" x="565" y="168" text-anchor="middle">da maioria</text>
+                <text class="d-label" x="565" y="195" text-anchor="middle">FALHA</text>
+              </svg>
+              <figcaption>Figura 8. Exemplo ilustrativo com 3 árvores; o modelo do projeto usa 200.</figcaption>
+            </figure>
+            <dl class="model__grid">
+              <div>
+                <dt>Conceito</dt>
+                <dd>Uma “floresta” de muitas árvores de decisão, cada uma treinada de um jeito um pouco diferente. A
+                  previsão final é a classe mais votada entre elas.</dd>
+              </div>
+              <div>
+                <dt>Como funciona</dt>
+                <dd>Cada árvore é treinada com uma amostra diferente dos dados e, a cada pergunta, só considera um
+                  subconjunto dos atributos. Como as árvores erram em lugares diferentes, a votação costuma ser mais
+                  estável do que uma árvore sozinha.</dd>
+              </div>
+              <div>
+                <dt>Exemplo simples</dt>
+                <dd>Se duas de três árvores preveem FALHA e uma prevê RISCO, a floresta prevê FALHA, como na Figura 8.
+                </dd>
+              </div>
+              <div>
+                <dt>Vantagens</dt>
+                <dd>Em geral generaliza melhor que uma árvore única, e também indica a importância dos atributos.</dd>
+              </div>
+              <div>
+                <dt>Limitações</dt>
+                <dd>É mais difícil de interpretar, porque são centenas de árvores, e mais lenta para treinar e usar.
+                </dd>
+              </div>
+              <div>
+                <dt>Aplicação no NetPulse</dt>
+                <dd>Treinada com os mesmos nove atributos, com 200 árvores, folhas de pelo menos 5 amostras e pesos
+                  balanceados dentro de cada amostra. Na validação, obteve F1 macro de 0,544.</dd>
+              </div>
+            </dl>
+          </article>
+
+          <h3>Como os hiperparâmetros foram escolhidos</h3>
+          <p>Hiperparâmetros são as “regulagens” do algoritmo, definidas antes do treino. O projeto testou combinações
+            em uma busca em grade (<em>grid search</em>) e escolheu a melhor pelo <strong>F1 macro na
+              validação</strong>, sem olhar o teste: foram 30 combinações para a Árvore de Decisão e 24 para o Random
+            Forest. A semente aleatória foi 42 nos dois casos.</p>
+        </section>
+
+        <!-- ============ 6. RESULTADOS ============ -->
+        <section class="section" id="resultados" aria-labelledby="h-resultados">
+          <h2 id="h-resultados"><span class="sec-num">6</span> Resultados e comparação dos modelos</h2>
+
+          <p>Todos os resultados abaixo vêm do <strong>conjunto de teste</strong>: 12.518 medições de 5 fluxos que o
+            modelo não viu durante o treino (8.152 OK, 653 RISCO e 3.713 FALHA). Os valores dos modelos seguem o README
+            do projeto, e a regra de referência e a balanced accuracy foram calculadas a partir dos dados e das matrizes
+            de confusão do repositório.</p>
+
+          <h3>As métricas, em linguagem simples</h3>
+          <dl class="glossary">
+            <div>
+              <dt>Acurácia</dt>
+              <dd>De todas as previsões, que fração estava certa. Pode enganar quando uma classe domina: prever sempre
+                OK já acertaria cerca de 65% do teste.</dd>
+            </div>
+            <div>
+              <dt>Precisão</dt>
+              <dd>Quando o modelo diz “FALHA”, quantas vezes ele acerta. Mede falsos alarmes.</dd>
+            </div>
+            <div>
+              <dt>Recall</dt>
+              <dd>De todas as FALHAs reais, quantas o modelo encontrou. Mede alarmes perdidos.</dd>
+            </div>
+            <div>
+              <dt>F1</dt>
+              <dd>Combina precisão e recall em um número. O <strong>F1 macro</strong> é a média dos F1 das três classes,
+                todas com o mesmo peso, então a classe rara RISCO pesa tanto quanto OK.</dd>
+            </div>
+            <div>
+              <dt>Balanced accuracy</dt>
+              <dd>A média dos recalls das três classes. Também trata as classes com o mesmo peso. Neste artigo ela foi
+                derivada das matrizes de confusão.</dd>
+            </div>
+            <div>
+              <dt>Matriz de confusão</dt>
+              <dd>Uma tabela que cruza a classe real (linhas) com a prevista (colunas). A diagonal são os acertos, e o
+                resto mostra quais classes o modelo confunde.</dd>
+            </div>
+          </dl>
+
+          <h3>Comparação geral</h3>
+          <div class="table-wrap">
+            <table class="table table--results">
+              <caption>Tabela 5. Métricas no conjunto de teste</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Métrica</th>
+                  <th scope="col">Repetir classe atual</th>
+                  <th scope="col">Árvore de Decisão</th>
+                  <th scope="col">Random Forest</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Acurácia</th>
+                  <td>85,16%</td>
+                  <td>72,04%</td>
+                  <td>82,72%</td>
+                </tr>
+                <tr>
+                  <th scope="row">F1 macro</th>
+                  <td>0,642</td>
+                  <td>0,555</td>
+                  <td>0,630</td>
+                </tr>
+                <tr>
+                  <th scope="row">Balanced accuracy</th>
+                  <td>64,27%</td>
+                  <td>58,15%</td>
+                  <td>62,99%</td>
+                </tr>
+                <tr>
+                  <th scope="row">Recall de FALHA</th>
+                  <td>88,10%</td>
+                  <td>48,67%</td>
+                  <td>75,73%</td>
+                </tr>
+                <tr>
+                  <th scope="row">Recall de RISCO</th>
+                  <td>15,31%</td>
+                  <td>40,58%</td>
+                  <td>22,51%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <figure class="figure figure--wide" id="fig-metricas">
+            <p class="figure__title">Figura 9. Métricas principais lado a lado</p>
+            <div class="figure__body" id="chart-metricas" role="img"
+              aria-label="Gráfico de barras agrupadas comparando acurácia, F1 macro, balanced accuracy, recall de FALHA e recall de RISCO entre a regra de repetir a classe atual, a Árvore de Decisão e o Random Forest. Os valores estão na Tabela 5.">
+            </div>
+            <figcaption>Como ler: cada grupo de barras é uma métrica e cada cor é uma abordagem; barras mais altas são
+              melhores. O Random Forest supera a Árvore de Decisão em quatro das cinco métricas, e a Árvore só vence no
+              recall de RISCO.</figcaption>
+          </figure>
+
+          <h3>O que acontece em cada classe</h3>
+          <div class="table-wrap">
+            <table class="table table--results">
+              <caption>Tabela 6. Precisão, recall e F1 por classe (teste)</caption>
+              <thead>
+                <tr>
+                  <th scope="col" rowspan="2">Classe</th>
+                  <th scope="colgroup" colspan="3">Precisão</th>
+                  <th scope="colgroup" colspan="3">Recall</th>
+                  <th scope="colgroup" colspan="3">F1</th>
+                </tr>
+                <tr>
+                  <th scope="col">Ref.</th>
+                  <th scope="col">Árvore</th>
+                  <th scope="col">RF</th>
+                  <th scope="col">Ref.</th>
+                  <th scope="col">Árvore</th>
+                  <th scope="col">RF</th>
+                  <th scope="col">Ref.</th>
+                  <th scope="col">Árvore</th>
+                  <th scope="col">RF</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">OK</th>
+                  <td>0,898</td>
+                  <td>0,915</td>
+                  <td>0,906</td>
+                  <td>0,894</td>
+                  <td>0,852</td>
+                  <td>0,907</td>
+                  <td>0,896</td>
+                  <td>0,883</td>
+                  <td>0,907</td>
+                </tr>
+                <tr>
+                  <th scope="row">RISCO</th>
+                  <td>0,146</td>
+                  <td>0,090</td>
+                  <td>0,112</td>
+                  <td>0,153</td>
+                  <td>0,406</td>
+                  <td>0,225</td>
+                  <td>0,150</td>
+                  <td>0,147</td>
+                  <td>0,149</td>
+                </tr>
+                <tr>
+                  <th scope="row">FALHA</th>
+                  <td>0,879</td>
+                  <td>0,915</td>
+                  <td>0,925</td>
+                  <td>0,881</td>
+                  <td>0,487</td>
+                  <td>0,757</td>
+                  <td>0,880</td>
+                  <td>0,635</td>
+                  <td>0,833</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">Ref. = regra de repetir a classe atual; RF = Random Forest.</p>
+
+          <figure class="figure figure--wide" id="fig-matrizes">
+            <p class="figure__title">Figura 10. Matrizes de confusão no teste</p>
+            <div class="figure__controls">
+              <button class="chip is-active" type="button" id="matriz-contagem" aria-pressed="true">Contagem</button>
+              <button class="chip" type="button" id="matriz-percentual" aria-pressed="false">% da classe real</button>
+            </div>
+            <div class="matrices" id="matrizes" role="group"
+              aria-label="Matrizes de confusão da regra de referência, da Árvore de Decisão e do Random Forest"></div>
+            <figcaption>Como ler: em cada matriz, as linhas são a classe real e as colunas, a prevista. Células na
+              diagonal são acertos. A Árvore de Decisão errou 1.624 FALHAs reais ao prever RISCO, e o Random Forest
+              errou 588 do mesmo tipo. Em ambos, a maior parte dos RISCOs reais foi prevista como OK ou FALHA.
+            </figcaption>
+          </figure>
+
+          <h3>O que os resultados significam</h3>
+          <ul class="insights">
+            <li><strong>Random Forest contra Árvore de Decisão.</strong> O Random Forest teve F1 macro 0,075 maior
+              (0,630 contra 0,555), acurácia 10,7 pontos percentuais maior e recall de FALHA 27,1 pontos maior. Ele
+              encontra muito mais falhas reais, com precisão semelhante.</li>
+            <li><strong>O papel da Árvore.</strong> A Árvore de Decisão é a melhor em recall de RISCO (40,6% contra
+              22,5%), à custa de mais falsos alarmes: sua precisão em RISCO é de apenas 9,0%.</li>
+            <li><strong>A referência é exigente.</strong> Estados de rede tendem a persistir, então a classe atual já
+              acerta o estado de 12 minutos depois em 85,2% dos casos. Nessa régua, o Random Forest chega perto (F1
+              macro 0,630 contra 0,642), mas fica abaixo em acurácia e em recall de FALHA. Ele supera a referência no
+              recall de RISCO (22,5% contra 15,3%), no recall e no F1 de OK e na precisão de FALHA.</li>
+            <li><strong>RISCO é a classe difícil.</strong> Nenhuma abordagem passa de 15% de precisão em RISCO, e o F1
+              dessa classe fica perto de 0,15 nas três.</li>
+          </ul>
+
+          <p class="note">Os tempos de treinamento e de predição do modelo final não estão registrados no repositório,
+            por isso não são apresentados.</p>
+        </section>
+
+        <!-- ============ 7. MELHOR MODELO ============ -->
+        <section class="section" id="melhor-modelo" aria-labelledby="h-melhor-modelo">
+          <h2 id="h-melhor-modelo"><span class="sec-num">7</span> Destaque: o melhor modelo de Machine Learning</h2>
+
+          <div class="winner" role="group" aria-labelledby="winner-title">
+            <p class="winner__badge">Melhor modelo treinado no experimento</p>
+            <h3 class="winner__title" id="winner-title">Random Forest</h3>
+            <p class="winner__text">Entre os dois modelos de Machine Learning treinados pelo projeto, o Random Forest
+              teve o melhor desempenho no teste em acurácia, F1 macro, balanced accuracy e recall de FALHA.</p>
+            <dl class="winner__stats">
+              <div>
+                <dt>F1 macro</dt>
+                <dd>0,630</dd>
+                <dd class="winner__vs">Árvore: 0,555</dd>
+              </div>
+              <div>
+                <dt>Acurácia</dt>
+                <dd>82,72%</dd>
+                <dd class="winner__vs">Árvore: 72,04%</dd>
+              </div>
+              <div>
+                <dt>Balanced accuracy</dt>
+                <dd>62,99%</dd>
+                <dd class="winner__vs">Árvore: 58,15%</dd>
+              </div>
+              <div>
+                <dt>Recall de FALHA</dt>
+                <dd>75,73%</dd>
+                <dd class="winner__vs">Árvore: 48,67%</dd>
+              </div>
+            </dl>
+          </div>
+
+          <h3>Por que ele superou a Árvore de Decisão</h3>
+          <p>Os números mostram <em>onde</em> a vantagem aparece: das 3.713 FALHAs reais do teste, o Random Forest
+            acertou 2.812 e a Árvore de Decisão, 1.807. A Árvore errou principalmente ao prever RISCO para falhas reais
+            (1.624 casos), um erro que o Random Forest cometeu em 588 casos.</p>
+          <p>O experimento não isolou o motivo, mas há uma explicação plausível e conhecida: ao combinar a votação de
+            200 árvores, que erram em lugares diferentes, o Random Forest tende a ser mais estável do que uma árvore
+            única de profundidade 5. Na validação a diferença foi pequena (F1 macro de 0,544 contra 0,539), e foi no
+            teste que ela apareceu com clareza.</p>
+
+          <h3>Como ele funciona, em poucas palavras</h3>
+          <p>O Random Forest do NetPulse é uma votação de 200 árvores de decisão. Cada árvore olha para uma amostra
+            diferente das medições e, em cada pergunta, considera apenas 3 dos 9 atributos, sorteados. A classe prevista
+            é a mais votada.</p>
+
+          <h3>Hiperparâmetros utilizados</h3>
+          <div class="table-wrap">
+            <table class="table table--compact">
+              <caption>Tabela 7. Hiperparâmetros escolhidos na busca de 24 combinações</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Hiperparâmetro</th>
+                  <th scope="col">Valor escolhido</th>
+                  <th scope="col">Opções testadas</th>
+                  <th scope="col">Papel geral</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>n_estimators</code></td>
+                  <td>200</td>
+                  <td>100 e 200</td>
+                  <td>Número de árvores. Mais árvores deixam a votação mais estável, com ganhos cada vez menores e mais
+                    custo de processamento.</td>
+                </tr>
+                <tr>
+                  <td><code>max_depth</code></td>
+                  <td>sem limite</td>
+                  <td>6, 12 e sem limite</td>
+                  <td>Profundidade máxima de cada árvore. Árvores mais profundas captam padrões mais complexos, mas
+                    podem decorar o treino.</td>
+                </tr>
+                <tr>
+                  <td><code>min_samples_leaf</code></td>
+                  <td>5</td>
+                  <td>5 e 50</td>
+                  <td>Mínimo de amostras em cada folha. Valores maiores geram árvores mais simples e suaves.</td>
+                </tr>
+                <tr>
+                  <td><code>max_features</code></td>
+                  <td>raiz quadrada (3 dos 9 atributos)</td>
+                  <td>apenas raiz quadrada</td>
+                  <td>Quantos atributos cada pergunta pode considerar. Limitar esse número faz as árvores serem
+                    diferentes entre si.</td>
+                </tr>
+                <tr>
+                  <td><code>class_weight</code></td>
+                  <td>balanced_subsample</td>
+                  <td>nenhum e balanced_subsample</td>
+                  <td>Dá mais peso às classes raras (RISCO e FALHA) em cada amostra de treino.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">A semente aleatória foi 42 e o critério de seleção foi o F1 macro na validação. A coluna
+            “Papel geral” descreve a função de cada hiperparâmetro. O experimento não mediu o efeito isolado de cada um.
+          </p>
+
+          <h3>O que mais pesou nas decisões</h3>
+          <figure class="figure figure--wide" id="fig-importancia">
+            <p class="figure__title">Figura 11. Importância dos atributos</p>
+            <div class="figure__body" id="chart-importancia" role="img"
+              aria-label="Gráfico de barras horizontais com a importância dos nove atributos no Random Forest e na Árvore de Decisão. O z_robusto é o mais importante nos dois modelos.">
+            </div>
+            <figcaption>Como ler: quanto maior a barra, mais o atributo ajudou o modelo a separar as classes. O
+              <code>z_robusto</code>, que mede o desvio em relação ao normal do fluxo, lidera nos dois modelos. Os
+              atributos de perda e de timeout têm importância próxima de zero.
+            </figcaption>
+          </figure>
+          <p>Esse resultado é coerente com a forma como os rótulos foram criados: 98,6% das FALHAs do Período B (10.817
+            de 10.976) foram rotuladas pela regra do <code>z_robusto</code> de 3,5 ou mais. Já as regras de perda e de
+            timeout originaram poucos casos (147 e 6).</p>
+
+          <h3>Onde ele ainda erra</h3>
+          <ul class="insights">
+            <li><strong>RISCO.</strong> O recall de RISCO é de 22,5% e a precisão, de 11,2%: dos 653 RISCOs reais, 147
+              foram acertados e 453 foram previstos como OK.</li>
+            <li><strong>FALHA prevista como RISCO ou OK.</strong> 588 FALHAs foram previstas como RISCO e 313 como OK,
+              entre as 3.713 do teste.</li>
+            <li><strong>Falsos alarmes de RISCO.</strong> 581 medições OK foram previstas como RISCO.</li>
+          </ul>
+
+          <aside class="callout" aria-label="Comparação com a regra de referência">
+            <p class="callout__title">E em relação à regra de referência?</p>
+            <p>O Random Forest é o melhor modelo treinado, mas a regra de repetir a classe atual obteve valores maiores
+              em acurácia (85,16% contra 82,72%), F1 macro (0,642 contra 0,630), balanced accuracy e recall de FALHA. O
+              Random Forest, por sua vez, tem recall de RISCO maior (22,5% contra 15,3%), assim como recall e F1 de OK e
+              precisão de FALHA (92,5% contra 87,9%). O NetPulse foi desenhado para prever a condição futura dos fluxos,
+              e esse resultado mostra um espaço claro de melhoria, discutido nas limitações.</p>
+          </aside>
+        </section>
+
+        <!-- ============ 8. API ============ -->
+        <section class="section" id="api" aria-labelledby="h-api">
+          <h2 id="h-api"><span class="sec-num">8</span> Como utilizar a API</h2>
+
+          <aside class="callout callout--idea" aria-label="Sobre a API do projeto">
+
+            <p class="callout__title">Uma observação importante</p>
+            <p>O NetPulse é um projeto acadêmico que utiliza a <strong>API REST do RIPE Atlas</strong> para obter dados
+              de monitoramento de rede, como latência, perda de pacotes e disponibilidade. Essas informações são
+              utilizadas no processamento e treinamento dos modelos de Machine Learning, que identificam possíveis
+              falhas e classificam os fluxos como OK, RISCO ou FALHA. O projeto não possui uma API própria, mas
+              disponibiliza os modelos treinados e salvos em formato <strong>.joblib</strong>, que podem ser
+              reutilizados por outra aplicação, como o aplicativo desenvolvido pela equipe de ADS.</p>
+          </aside>
+
+          <h3>Finalidade</h3>
+          <p>O pipeline consulta a API do RIPE Atlas para obter informações sobre os destinos (<em>anchors</em>), as
+            origens (<em>probes</em>), as medições e os resultados dos pings. As requisições do projeto são públicas: o
+            código não envia chave de API.</p>
+
+          <h3>Endpoints utilizados</h3>
+          <p>O endereço base é <code>https://atlas.ripe.net/api/v2</code>, e todas as chamadas usam o método HTTP
+            <strong>GET</strong>.
+          </p>
+          <div class="table-wrap">
+            <table class="table table--compact">
+              <caption>Tabela 8. Endpoints da API do RIPE Atlas usados na coleta</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Método</th>
+                  <th scope="col">Endpoint</th>
+                  <th scope="col">Para que serve no projeto</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/anchors/{anchor_id}/</code></td>
+                  <td>Metadados do anchor de destino, como localização.</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/probes/{probe_id}/</code></td>
+                  <td>Metadados da probe de origem.</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/measurements/{measurement_id}/</code></td>
+                  <td>Metadados da medição.</td>
+                </tr>
+                <tr>
+                  <td>GET</td>
+                  <td><code>/measurements/{measurement_id}/results/</code></td>
+                  <td>Resultados dos pings, com os parâmetros <code>start</code>, <code>stop</code> e
+                    <code>probe_ids</code>.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Exemplo de requisição</h3>
+          <p>Este exemplo segue o código de coleta do projeto e usa identificadores reais: a medição 11863561, cujo
+            destino é o anchor 1227, e a probe 6251. As datas são aproximadas e delimitam o Período A.</p>
+          <figure class="code-figure">
+            <figcaption class="code-figure__title">Python, com a biblioteca requests</figcaption>
+            <pre class="code" tabindex="0"><code>import requests
+
+url = "https://atlas.ripe.net/api/v2/measurements/11863561/results/"
+params = {
+    "start": "2026-09-24T00:37:00",  # início do Período A (aproximado)
+    "stop": "2026-10-01T00:37:00",   # fim do Período A (aproximado)
+    "probe_ids": 6251,
+}
+
+resposta = requests.get(url, params=params)
+resposta.raise_for_status()
+resultados = resposta.json()</code></pre>
+          </figure>
+
+          <h3>Exemplo de resposta</h3>
+          <p>O exemplo abaixo é a primeira linha do <code>period_a.csv</code>, que traz esse resultado já organizado, com os campos de endereço IP omitidos.
+          </p>
+          <figure class="code-figure">
+            <figcaption class="code-figure__title">Primeira linha de period_a.csv</figcaption>
+            <pre class="code" tabindex="0"><code>anchor_id : 1227
+probe_id  : 6251
+msm_id    : 11863561
+ttl       : 50.0
+result    : [{'rtt': 64.985744}, {'rtt': 65.258971}, {'rtt': 65.274425}]
+dup       : 0
+rcvd      : 3
+sent      : 3
+min       : 64.985744
+max       : 65.274425
+avg       : 65.17304666666666
+timestamp : 1790210398
+type      : ping
+packets   : 3
+interval  : 240</code></pre>
+          </figure>
+
+          <h3>Campos retornados</h3>
+          <div class="table-wrap">
+            <table class="table table--compact">
+              <caption>Tabela 9. Campos de cada resultado de ping</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Campo</th>
+                  <th scope="col">Significado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>result</code></td>
+                  <td>RTT de cada pacote da medição, em ms.</td>
+                </tr>
+                <tr>
+                  <td><code>sent</code> e <code>rcvd</code></td>
+                  <td>Pacotes enviados e recebidos.</td>
+                </tr>
+                <tr>
+                  <td><code>min</code>, <code>max</code> e <code>avg</code></td>
+                  <td>Menor, maior e média dos RTTs, em ms. O valor -1 indica que não houve RTT válido.</td>
+                </tr>
+                <tr>
+                  <td><code>timestamp</code></td>
+                  <td>Instante do resultado, em Unix timestamp.</td>
+                </tr>
+                <tr>
+                  <td><code>ttl</code> e <code>dup</code></td>
+                  <td>Time to Live informado e respostas duplicadas.</td>
+                </tr>
+                <tr>
+                  <td><code>type</code>, <code>packets</code> e <code>interval</code></td>
+                  <td>Tipo da medição (ping), pacotes por medição (3) e intervalo entre medições (240 s).</td>
+                </tr>
+                <tr>
+                  <td><code>msm_id</code>, <code>probe_id</code> e <code>anchor_id</code></td>
+                  <td>Identificam a medição, a probe de origem e o anchor de destino, ou seja, o fluxo.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Reutilizando os modelos treinados</h3>
+          <p>Depois do treino, cada modelo é salvo em um arquivo <code>.joblib</code>, acompanhado de um arquivo JSON de
+            metadados. Os arquivos <code>.joblib</code> não ficam versionados no repositório; segundo a equipe, eles
+            foram repassados a outra equipe para a construção de um aplicativo. Os metadados em JSON documentam o
+            contrato do modelo:</p>
+          <ul>
+            <li><strong>Entrada:</strong> os nove atributos da Tabela 4, calculados antes de chamar o modelo, com a
+              medição atual, as últimas cinco medições do fluxo e o baseline.</li>
+            <li><strong>Saída:</strong> a classe prevista para o estado do fluxo 12 minutos adiante: OK, RISCO ou FALHA.
+            </li>
+          </ul>
+          <figure class="code-figure">
+            <figcaption class="code-figure__title">Exemplo de entrada e saída registrado nos metadados</figcaption>
+            <pre class="code" tabindex="0"><code>{
+  "entrada": {
+    "perda_pct": 0.0,
+    "aumento_pct": -0.8133,
+    "z_robusto": -2.2003,
+    "jitter_atual": 0.0805,
+    "jitter_relativo": 0.5089,
+    "timeout_atual": 0,
+    "n5_timeout": 0,
+    "n5_aumento80": 0,
+    "n5_risco": 0
+  },
+  "saida_prevista": "OK"
+}</code></pre>
+          </figure>
+          <p>O arquivo <code>.joblib</code> guarda um dicionário com o modelo treinado (chave <code>modelo</code>) e a
+            lista de atributos (chave <code>features</code>). Um uso típico em Python seria:</p>
+          <figure class="code-figure">
+            <figcaption class="code-figure__title">Python, com joblib e pandas</figcaption>
+            <pre class="code" tabindex="0"><code>import joblib
+import pandas as pd
+
+pacote = joblib.load("modelo_random_forest.joblib")
+modelo = pacote["modelo"]
+
+medicao = pd.DataFrame([{
+    "perda_pct": 0.0, "aumento_pct": -0.8133, "z_robusto": -2.2003,
+    "jitter_atual": 0.0805, "jitter_relativo": 0.5089, "timeout_atual": 0,
+    "n5_timeout": 0, "n5_aumento80": 0, "n5_risco": 0,
+}], columns=pacote["features"])
+
+print(modelo.predict(medicao)[0])</code></pre>
+          </figure>
+        </section>
+
+        <!-- ============ 9. LIMITAÇÕES ============ -->
+        <section class="section" id="limitacoes" aria-labelledby="h-limitacoes">
+          <h2 id="h-limitacoes"><span class="sec-num">9</span> Limitações e próximos passos</h2>
+
+          <p>Resultados só são úteis quando vêm acompanhados de seus limites. Estas são as limitações reais do NetPulse.
+          </p>
+
+          <div class="limits">
+            <article class="limit">
+              <h3>Rótulos heurísticos</h3>
+              <p>As classes vêm de regras com limiares fixos, e não de chamados ou incidentes reais. Por isso os modelos
+                aprendem a política de rotulagem. Quase todas as FALHAs (98,6%) vieram da regra do
+                <code>z_robusto</code>.
+              </p>
+            </article>
+            <article class="limit">
+              <h3>Representatividade das medições</h3>
+              <p>São 30 fluxos, 7 anchors e 22 probes, e 21 dos fluxos são de distância longa. Os anchors não
+                representam a rede de um campus. O teste usa apenas 5 fluxos, e um deles concentra 2.115 das 3.713
+                FALHAs do teste (57%).</p>
+            </article>
+            <article class="limit">
+              <h3>Jitter e perda</h3>
+              <p>Cada medição tem só 3 pacotes, o que torna o jitter uma estimativa pobre. A perda típica é zero em
+                todos os fluxos, e só 0,07% das medições do Período B ficaram sem RTT válido.</p>
+            </article>
+            <article class="limit">
+              <h3>Baseline fixo</h3>
+              <p>O baseline é calculado uma vez, no Período A, e permanece congelado. Ele não acompanha uma troca de
+                rota nem uma mudança gradual no comportamento normal do fluxo.</p>
+            </article>
+            <article class="limit">
+              <h3>Período de coleta</h3>
+              <p>Foram duas semanas consecutivas: uma para o baseline e outra para rotular e treinar. Padrões que
+                aparecem só em períodos mais longos não foram avaliados.</p>
+            </article>
+            <article class="limit">
+              <h3>Horizonte de previsão</h3>
+              <p>O horizonte é de 12 minutos. Outros horizontes não foram testados, e o resultado deve ser lido apenas
+                para esse alvo.</p>
+            </article>
+            <article class="limit">
+              <h3>Desbalanceamento das classes</h3>
+              <p>No conjunto completo, 77,7% das medições são OK, 14,6% são FALHA e 7,7% são RISCO. Como a divisão é por
+                fluxo, a proporção muda entre os conjuntos: o teste tem 29,7% de FALHA, contra 11,8% no treino.</p>
+            </article>
+            <article class="limit">
+              <h3>A classe RISCO</h3>
+              <p>Os dois modelos têm dificuldade com RISCO, que é a classe mais rara. A precisão fica entre 9% e 11% nos
+                dois modelos, ou seja, a maior parte dos alertas de RISCO é falso alarme.</p>
+            </article>
+          </div>
+
+          <p>Um aprendizado do processo também merece registro: antes de o rótulo ser deslocado 12 minutos, a acurácia
+            chegava a 100%, porque o modelo apenas “lia” a própria classe. A correção tornou a avaliação mais realista e
+            derrubou os números, como mostra a Seção 6.</p>
+
+          <h3>Possibilidades de evolução</h3>
+          <p>As ideias abaixo são caminhos de trabalho futuro. <strong>Nenhuma delas foi implementada.</strong></p>
+          <ul class="checklist">
+            <li>Investigar estratégias para melhorar a classificação de RISCO.</li>
+            <li>Explorar novos atributos e técnicas de engenharia de dados.</li>
+            <li>Avaliar outros algoritmos e outras estratégias de ajuste de hiperparâmetros.</li>
+            <li>Ampliar os testes com dados de diferentes períodos e fluxos de rede.</li>
+          </ul>
+        </section>
+
+        <!-- ============ 10. CONCLUSÃO ============ -->
+        <section class="section" id="conclusao" aria-labelledby="h-conclusao">
+          <h2 id="h-conclusao"><span class="sec-num">10</span> Conclusão</h2>
+
+          <p>O NetPulse nasceu de uma pergunta simples: como saber se uma latência é alta <em>para aquele fluxo</em>? A
+            resposta do projeto foi construir, para cada um dos 30 fluxos, um baseline com uma semana de medições do
+            RIPE Atlas e medir cada nova medição contra ele. Com essas métricas relativas, treinamos modelos para
+            classificar a condição do fluxo 12 minutos adiante em OK, RISCO ou FALHA.</p>
+
+          <p>Entre os modelos treinados, o Random Forest foi o melhor: F1 macro de 0,630, acurácia de 82,72% e recall de
+            FALHA de 75,73%, contra 0,555, 72,04% e 48,67% da Árvore de Decisão. A regra simples de repetir a classe
+            atual, usada como referência, obteve resultados gerais ainda maiores. A análise relativa ao comportamento de
+            cada fluxo também aparece nos modelos: o <code>z_robusto</code>, que mede o desvio em relação ao normal do
+            fluxo, foi o atributo mais importante em ambos.</p>
+
+          <p>Os resultados, porém, têm limites claros: rótulos baseados em regras, apenas 5 fluxos no teste, baseline
+            fixo e dificuldade com a classe RISCO. O NetPulse é um ponto de partida para um preditor de degradações de
+            rede, e o caminho para evoluí-lo está nas melhorias listadas na seção anterior.</p>
+
+          <p class="closing">Do ping ao alerta de rede, o ponto central continua o mesmo: antes de dizer que algo está
+            anormal, é preciso saber o que é normal.</p>
+        </section>
+
+        <!-- ============ REFERÊNCIAS ============ -->
+        <section class="section section--refs" id="referencias" aria-labelledby="h-referencias">
+          <h2 id="h-referencias">Referências</h2>
+          <p>Para quem quer se aprofundar em Árvore de Decisão e Random Forest, estas são boas fontes para começar.</p>
+
+          <ol class="references">
+            <li>
+              <p>BREIMAN, L. <strong>Random Forests</strong>. <em>Machine Learning</em>, v. 45, n. 1, p. 5-32, 2001. <a
+                  href="https://doi.org/10.1023/A:1010933404324" target="_blank"
+                  rel="noopener noreferrer">doi.org/10.1023/A:1010933404324</a></p>
+              <p class="references__note">O artigo original que apresenta o Random Forest.</p>
+            </li>
+            <li>
+              <p>BREIMAN, L.; FRIEDMAN, J. H.; OLSHEN, R. A.; STONE, C. J. <strong>Classification and Regression
+                  Trees</strong>. Belmont: Wadsworth, 1984.</p>
+              <p class="references__note">A obra clássica sobre árvores de decisão (CART).</p>
+            </li>
+            <li>
+              <p>HASTIE, T.; TIBSHIRANI, R.; FRIEDMAN, J. <strong>The Elements of Statistical Learning</strong>: data
+                mining, inference, and prediction. 2. ed. New York: Springer, 2009.</p>
+              <p class="references__note">Livro de referência em aprendizado estatístico. Os capítulos 9 (métodos
+                baseados em árvores) e 15 (Random Forests) são os mais relacionados a este artigo.</p>
+            </li>
+            <li>
+              <p>SCIKIT-LEARN. <strong>Decision Trees</strong>. Guia do usuário. <a
+                  href="https://scikit-learn.org/stable/modules/tree.html" target="_blank"
+                  rel="noopener noreferrer">scikit-learn.org/stable/modules/tree.html</a></p>
+              <p class="references__note">Explicação prática de vantagens, limitações e uso de árvores de decisão em
+                Python.</p>
+            </li>
+            <li>
+              <p>SCIKIT-LEARN. <strong>RandomForestClassifier</strong>. Documentação da API. <a
+                  href="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html"
+                  target="_blank"
+                  rel="noopener noreferrer">scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html</a>
+              </p>
+              <p class="references__note">Descreve cada hiperparâmetro citado na Seção 7, como
+                <code>n_estimators</code>, <code>min_samples_leaf</code> e <code>class_weight</code>.
+              </p>
+            </li>
+            <li>
+              <p>PEDREGOSA, F. et al. <strong>Scikit-learn: Machine Learning in Python</strong>. <em>Journal of Machine
+                  Learning Research</em>, v. 12, p. 2825-2830, 2011. <a
+                  href="https://jmlr.org/papers/v12/pedregosa11a.html" target="_blank"
+                  rel="noopener noreferrer">jmlr.org/papers/v12/pedregosa11a.html</a></p>
+              <p class="references__note">O artigo que apresenta a biblioteca scikit-learn.</p>
+            </li>
+            <li>
+              <p>RIPE NCC. <strong>RIPE Atlas</strong>. <a href="https://atlas.ripe.net/" target="_blank"
+                  rel="noopener noreferrer">atlas.ripe.net</a></p>
+              <p class="references__note">Plataforma de medições de rede de onde vêm os dados do NetPulse.</p>
+            </li>
+          </ol>
+        </section>
+
+      </article>
+    </div>
+  </main>
+
+  <!-- ===== Rodapé ===== -->
+  <footer class="site-footer">
+    <section class="team" id="equipe" aria-labelledby="h-equipe">
+      <div class="team__inner">
+        <h2 id="h-equipe">Desenvolvido pelo Grupo 2</h2>
+        <p class="team__intro">Estudantes de Ciência da Computação autores do projeto NetPulse.</p>
+
+        <ul class="team__list">
+          <li class="member">
+            <div class="member__photo member__photo--initials" role="img"
+              aria-label="Avatar com as iniciais de Eduardo Gabriel de Souza Cardozo">
+              <span aria-hidden="true">EC</span>
+            </div>
+            <h3 class="member__name">Eduardo Gabriel de Souza Cardozo</h3>
+            <p class="member__role">Estudante de Ciência da Computação, com interesse em cibersegurança.</p>
+            <ul class="member__links">
+              <li><a href="https://github.com/Eduyuk14su" target="_blank" rel="noopener noreferrer"
+                  aria-label="GitHub de Eduardo Gabriel de Souza Cardozo (abre em nova aba)">GitHub</a></li>
+              <li><a href="https://www.linkedin.com/in/eduardo-gabriel-8305b7358/" target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn de Eduardo Gabriel de Souza Cardozo (abre em nova aba)">LinkedIn</a></li>
+            </ul>
+          </li>
+
+          <li class="member">
+            <div class="member__photo">
+              <img src="assets/images/gabriel_alves.jpeg" alt="Foto de Gabriel Alves de Farias" width="1199" height="1599"
+                loading="lazy" style="--focus: 50% 38%">
+            </div>
+            <h3 class="member__name">Gabriel Alves de Farias</h3>
+            <p class="member__role">Estudante de Ciência da Computação.</p>
+            <ul class="member__links">
+              <li><a href="https://github.com/biel391" target="_blank" rel="noopener noreferrer"
+                  aria-label="GitHub de Gabriel Alves de Farias (abre em nova aba)">GitHub</a></li>
+              <li><a href="https://www.linkedin.com/in/gabriel-undefined-93b16a442/" target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn de Gabriel Alves de Farias (abre em nova aba)">LinkedIn</a></li>
+            </ul>
+          </li>
+
+          <li class="member">
+            <div class="member__photo">
+              <img src="assets/images/gisele-franco.jpg" alt="Foto de Gisele Franco de Lima" width="784" height="1336"
+                loading="lazy" style="--focus: 50% 30%">
+            </div>
+            <h3 class="member__name">Gisele Franco de Lima</h3>
+            <p class="member__role">Estudante de Ciência da Computação, com interesse em cibersegurança.</p>
+            <ul class="member__links">
+              <li><a href="https://github.com/gi-franco" target="_blank" rel="noopener noreferrer"
+                  aria-label="GitHub de Gisele Franco de Lima (abre em nova aba)">GitHub</a></li>
+              <li><a href="https://www.linkedin.com/in/gisele-franco-de-lima-b57638389" target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn de Gisele Franco de Lima (abre em nova aba)">LinkedIn</a></li>
+            </ul>
+          </li>
+
+          <li class="member">
+            <div class="member__photo">
+              <img src="assets/images/luigi_caires.png" alt="Foto de Luigi Santos Caires" width="646" height="744"
+                loading="lazy" style="--focus: 50% 40%">
+            </div>
+            <h3 class="member__name">Luigi Santos Caires</h3>
+            <p class="member__role">Estudante de Ciência da Computação.</p>
+            <ul class="member__links">
+              <li><a href="https://github.com/luigilegal" target="_blank" rel="noopener noreferrer"
+                  aria-label="GitHub de Luigi Santos Caires (abre em nova aba)">GitHub</a></li>
+              <li><a href="https://www.linkedin.com/in/luigi-s-67b101387/" target="_blank" rel="noopener noreferrer"
+                  aria-label="LinkedIn de Luigi Santos Caires (abre em nova aba)">LinkedIn</a></li>
+            </ul>
+          </li>
+
+          <li class="member">
+            <div class="member__photo">
+              <img src="assets/images/rodrigo-galvao.jpg" alt="Foto de Rodrigo de Souza Galvão" width="715" height="953"
+                loading="lazy" style="--focus: 50% 40%">
+            </div>
+            <h3 class="member__name">Rodrigo de Souza Galvão</h3>
+            <p class="member__role">Estudante de Ciência da Computação, com interesse em desenvolvimento de software e
+              engenharia de dados.</p>
+            <ul class="member__links">
+              <li><a href="https://github.com/Rodrigo3441" target="_blank" rel="noopener noreferrer"
+                  aria-label="GitHub de Rodrigo de Souza Galvão (abre em nova aba)">GitHub</a></li>
+              <li><a href="https://www.linkedin.com/in/rodrigo-souza-galvao/" target="_blank" rel="noopener noreferrer"
+                  aria-label="LinkedIn de Rodrigo de Souza Galvão (abre em nova aba)">LinkedIn</a></li>
+            </ul>
+          </li>
+        </ul>
+
+        <div class="courses">
+          <h3 class="courses__title">Projeto interdisciplinar</h3>
+          <ul class="courses__list">
+            <li class="course">
+              <span class="courses__subject">Estrutura de Dados II</span>
+              <span class="courses__teacher">Profa. Andrea Ono Sakai</span>
+            </li>
+            <li class="course">
+              <span class="courses__subject">Redes de Computadores</span>
+              <span class="courses__teacher">Profa. Denise Braito</span>
+            </li>
+            <li class="course">
+              <span class="courses__subject">Análise e Projeto de Sistemas</span>
+              <span class="courses__teacher">Prof. Luis Ricardo de Oliveira</span>
+            </li>
+          </ul>
+        </div>
+
+        <p class="team__bottom">Código, dados e documentação no <a
+            href="https://github.com/Rodrigo3441/netpulse-sistema-monitor-de-redes" target="_blank"
+            rel="noopener noreferrer">repositório do projeto no GitHub</a>. Dados de medição: <a
+            href="https://atlas.ripe.net/" target="_blank" rel="noopener noreferrer">RIPE Atlas</a>.</p>
+      </div>
+    </section>
+  </footer>
+
+  <noscript>
+    <p class="noscript">Os gráficos desta página precisam de JavaScript. Os valores exibidos nos gráficos também estão
+      nas tabelas do artigo.</p>
+  </noscript>
 </body>
+
 </html>
