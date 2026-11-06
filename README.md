@@ -3,7 +3,8 @@ Sistema para monitoramento de métricas de rede com análise em tempo real e pre
 
 ## Links de acesso ao vídeo de negócios e blog
 
-[Artigo do Projeto NetPulse](https://artigoprojetonetpulse.netlify.app/)
+[📖 Artigo do Projeto NetPulse](https://artigoprojetonetpulse.netlify.app/)<br>
+[📼 Acesso ao Vídeo Pitch do Projeto](https://www.youtube.com/watch?v=HbwWaYu635c)<br>
 
 ## 👨‍💻 Equipe e contexto acadêmico:
 
