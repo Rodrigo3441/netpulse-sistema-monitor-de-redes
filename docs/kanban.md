@@ -2,7 +2,7 @@
 | --------------- | ------------------------- | ----------- |
 | ⬜ A Fazer      | |  |
 | ⬜ A Fazer      | |  |
-| 🔵 Em Andamento | Produzir página do artigo do projeto | @Gisele |
+| 🔵 Em Andamento | |  |
 | ✅ Concluído    | Atualizar memorando de decisão | @Gisele |
 | ✅ Concluído    | Implementação da coleta de dados | @Rodrigo |
 | ✅ Concluído    | Justificar escolhas da equipe  | @Eduardo |
@@ -13,3 +13,4 @@
 | ✅ Concluído    | Construir coleta de dados do projeto em python | @Rodrigo |
 | ✅ Concluído    | Preencher tarefas.md e colocá-las em docs | @Gabriel |
 | ✅ Concluído    | Video de 90 segundos sobre o projeto | @Rodrigo |
+| ✅ Concluído    | Produzir página do artigo do projeto | @Gisele |
