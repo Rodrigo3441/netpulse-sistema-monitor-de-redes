@@ -57,7 +57,6 @@ O diagrama apresenta o fluxo completo do projeto, desde a coleta de medições d
 | [Joblib](https://joblib.readthedocs.io/) | 1.6.0 | Salvamento e carregamento dos modelos treinados em arquivos `.joblib`. |
 
 As versões das bibliotecas estão fixadas para facilitar a reprodução do ambiente de desenvolvimento.
-## Pipeline de dados
 
 ## Fluxo do Pipeline de Dados
 
