@@ -650,69 +650,7 @@
           <p>Um modelo de classificação aprende com exemplos que já têm a resposta. Aqui, cada exemplo é uma medição de
             rede (os nove atributos da Tabela 4), e a resposta é a classe 12 minutos depois: OK, RISCO ou FALHA. Depois
             de treinado, o modelo recebe uma medição nova e prevê a classe.</p>
-          <p>Três abordagens aparecem no artigo. A primeira é uma regra de referência, calculada para comparação, e as
-            outras duas são os modelos treinados pelo projeto.</p>
-
-          <aside class="callout" aria-label="Dois sentidos da palavra baseline">
-            <p class="callout__title">Atenção: “baseline” tem dois sentidos neste projeto</p>
-            <p>O <em>baseline de cada fluxo</em> (Seção 3) é a ficha estatística do comportamento normal. Já o
-              <em>baseline de comparação</em>, desta seção, é uma regra simples usada como ponto de partida para saber
-              se um modelo realmente agrega algo.
-            </p>
-          </aside>
-
-          <!-- ---- Regra de referência ---- -->
-          <article class="model" id="modelo-referencia">
-            <h3>Baseline de comparação: repetir a classe atual</h3>
-            <p class="model__tag">Cálculo feito a partir do <code>period_b_split.csv</code>, no conjunto de teste; não é
-              um modelo treinado.</p>
-            <figure class="figure figure--inline">
-              <svg class="diagram diagram--small" viewBox="0 0 640 140" role="img" aria-labelledby="ref-title">
-                <title id="ref-title">Regra de referência: a previsão para daqui a 12 minutos é igual à classe atual
-                </title>
-                <rect class="d-box" x="20" y="35" width="240" height="70" rx="10" />
-                <text class="d-label" x="140" y="65" text-anchor="middle">Medição agora</text>
-                <text class="d-small" x="140" y="88" text-anchor="middle">classe atual: RISCO</text>
-                <path class="d-arrow" d="M260 70 H380" marker-end="url(#seta)" />
-                <text class="d-small" x="320" y="60" text-anchor="middle">copia</text>
-                <rect class="d-box d-box--final" x="380" y="35" width="240" height="70" rx="10" />
-                <text class="d-label" x="500" y="65" text-anchor="middle">Previsão em 12 min</text>
-                <text class="d-small" x="500" y="88" text-anchor="middle">classe prevista: RISCO</text>
-              </svg>
-              <figcaption>Figura 6. A regra de referência apenas repete o estado de agora.</figcaption>
-            </figure>
-            <dl class="model__grid">
-              <div>
-                <dt>Conceito</dt>
-                <dd>Uma previsão “sem inteligência”: se o fluxo está em RISCO agora, prevê RISCO daqui a 12 minutos.
-                </dd>
-              </div>
-              <div>
-                <dt>Como funciona</dt>
-                <dd>Compara a classe atual de cada medição com a classe futura real. Não aprende nada nem usa os
-                  atributos.</dd>
-              </div>
-              <div>
-                <dt>Exemplo simples</dt>
-                <dd>Se um fluxo está em OK agora, a regra prevê OK. Ela só erra quando o estado muda dentro dos 12
-                  minutos.</dd>
-              </div>
-              <div>
-                <dt>Vantagens</dt>
-                <dd>É simples e dispensa treinamento. Serve de régua: um modelo só vale a pena se superar, ou
-                  complementar, essa regra.</dd>
-              </div>
-              <div>
-                <dt>Limitações</dt>
-                <dd>Por definição, nunca antecipa uma mudança de estado, e precisa que a classe atual já tenha sido
-                  calculada pelas regras de rotulagem.</dd>
-              </div>
-              <div>
-                <dt>Aplicação no NetPulse</dt>
-                <dd>Ponto de comparação nos resultados (Seção 6).</dd>
-              </div>
-            </dl>
-          </article>
+          <p>Dois modelos foram treinados pelo projeto e comparados neste artigo: a Árvore de Decisão e o Random Forest.</p>
 
           <!-- ---- Árvore de Decisão ---- -->
           <article class="model" id="modelo-arvore">
@@ -749,7 +687,7 @@
                 <rect class="d-leaf d-leaf--falha" x="480" y="240" width="140" height="50" rx="25" />
                 <text class="d-label" x="550" y="271" text-anchor="middle">FALHA</text>
               </svg>
-              <figcaption>Figura 7. Exemplo ilustrativo e simplificado. Não é uma regra extraída da árvore treinada do
+              <figcaption>Figura 6. Exemplo ilustrativo e simplificado. Não é uma regra extraída da árvore treinada do
                 projeto, e os limites reais são aprendidos dos dados.</figcaption>
             </figure>
             <dl class="model__grid">
@@ -766,7 +704,7 @@
               </div>
               <div>
                 <dt>Exemplo simples</dt>
-                <dd>Se o RTT está muito acima do normal e o jitter também, a árvore pode prever FALHA, como na Figura 7.
+                <dd>Se o RTT está muito acima do normal e o jitter também, a árvore pode prever FALHA, como na Figura 6.
                 </dd>
               </div>
               <div>
@@ -829,7 +767,7 @@
                 <text class="d-small" x="565" y="168" text-anchor="middle">da maioria</text>
                 <text class="d-label" x="565" y="195" text-anchor="middle">FALHA</text>
               </svg>
-              <figcaption>Figura 8. Exemplo ilustrativo com 3 árvores; o modelo do projeto usa 200.</figcaption>
+              <figcaption>Figura 7. Exemplo ilustrativo com 3 árvores; o modelo do projeto usa 200.</figcaption>
             </figure>
             <dl class="model__grid">
               <div>
@@ -845,7 +783,7 @@
               </div>
               <div>
                 <dt>Exemplo simples</dt>
-                <dd>Se duas de três árvores preveem FALHA e uma prevê RISCO, a floresta prevê FALHA, como na Figura 8.
+                <dd>Se duas de três árvores preveem FALHA e uma prevê RISCO, a floresta prevê FALHA, como na Figura 7.
                 </dd>
               </div>
               <div>
@@ -878,8 +816,7 @@
 
           <p>Todos os resultados abaixo vêm do <strong>conjunto de teste</strong>: 12.518 medições de 5 fluxos que o
             modelo não viu durante o treino (8.152 OK, 653 RISCO e 3.713 FALHA). Os valores dos modelos seguem o README
-            do projeto, e a regra de referência e a balanced accuracy foram calculadas a partir dos dados e das matrizes
-            de confusão do repositório.</p>
+            do projeto, e a balanced accuracy foi calculada a partir das matrizes de confusão do repositório.</p>
 
           <h3>As métricas, em linguagem simples</h3>
           <dl class="glossary">
@@ -920,7 +857,6 @@
               <thead>
                 <tr>
                   <th scope="col">Métrica</th>
-                  <th scope="col">Repetir classe atual</th>
                   <th scope="col">Árvore de Decisão</th>
                   <th scope="col">Random Forest</th>
                 </tr>
@@ -928,31 +864,26 @@
               <tbody>
                 <tr>
                   <th scope="row">Acurácia</th>
-                  <td>85,16%</td>
                   <td>72,04%</td>
                   <td>82,72%</td>
                 </tr>
                 <tr>
                   <th scope="row">F1 macro</th>
-                  <td>0,642</td>
                   <td>0,555</td>
                   <td>0,630</td>
                 </tr>
                 <tr>
                   <th scope="row">Balanced accuracy</th>
-                  <td>64,27%</td>
                   <td>58,15%</td>
                   <td>62,99%</td>
                 </tr>
                 <tr>
                   <th scope="row">Recall de FALHA</th>
-                  <td>88,10%</td>
                   <td>48,67%</td>
                   <td>75,73%</td>
                 </tr>
                 <tr>
                   <th scope="row">Recall de RISCO</th>
-                  <td>15,31%</td>
                   <td>40,58%</td>
                   <td>22,51%</td>
                 </tr>
@@ -961,9 +892,9 @@
           </div>
 
           <figure class="figure figure--wide" id="fig-metricas">
-            <p class="figure__title">Figura 9. Métricas principais lado a lado</p>
+            <p class="figure__title">Figura 8. Métricas principais lado a lado</p>
             <div class="figure__body" id="chart-metricas" role="img"
-              aria-label="Gráfico de barras agrupadas comparando acurácia, F1 macro, balanced accuracy, recall de FALHA e recall de RISCO entre a regra de repetir a classe atual, a Árvore de Decisão e o Random Forest. Os valores estão na Tabela 5.">
+              aria-label="Gráfico de barras agrupadas comparando acurácia, F1 macro, balanced accuracy, recall de FALHA e recall de RISCO entre a Árvore de Decisão e o Random Forest. Os valores estão na Tabela 5.">
             </div>
             <figcaption>Como ler: cada grupo de barras é uma métrica e cada cor é uma abordagem; barras mais altas são
               melhores. O Random Forest supera a Árvore de Decisão em quatro das cinco métricas, e a Árvore só vence no
@@ -977,18 +908,15 @@
               <thead>
                 <tr>
                   <th scope="col" rowspan="2">Classe</th>
-                  <th scope="colgroup" colspan="3">Precisão</th>
-                  <th scope="colgroup" colspan="3">Recall</th>
-                  <th scope="colgroup" colspan="3">F1</th>
+                  <th scope="colgroup" colspan="2">Precisão</th>
+                  <th scope="colgroup" colspan="2">Recall</th>
+                  <th scope="colgroup" colspan="2">F1</th>
                 </tr>
                 <tr>
-                  <th scope="col">Ref.</th>
                   <th scope="col">Árvore</th>
                   <th scope="col">RF</th>
-                  <th scope="col">Ref.</th>
                   <th scope="col">Árvore</th>
                   <th scope="col">RF</th>
-                  <th scope="col">Ref.</th>
                   <th scope="col">Árvore</th>
                   <th scope="col">RF</th>
                 </tr>
@@ -996,53 +924,44 @@
               <tbody>
                 <tr>
                   <th scope="row">OK</th>
-                  <td>0,898</td>
                   <td>0,915</td>
                   <td>0,906</td>
-                  <td>0,894</td>
                   <td>0,852</td>
                   <td>0,907</td>
-                  <td>0,896</td>
                   <td>0,883</td>
                   <td>0,907</td>
                 </tr>
                 <tr>
                   <th scope="row">RISCO</th>
-                  <td>0,146</td>
                   <td>0,090</td>
                   <td>0,112</td>
-                  <td>0,153</td>
                   <td>0,406</td>
                   <td>0,225</td>
-                  <td>0,150</td>
                   <td>0,147</td>
                   <td>0,149</td>
                 </tr>
                 <tr>
                   <th scope="row">FALHA</th>
-                  <td>0,879</td>
                   <td>0,915</td>
                   <td>0,925</td>
-                  <td>0,881</td>
                   <td>0,487</td>
                   <td>0,757</td>
-                  <td>0,880</td>
                   <td>0,635</td>
                   <td>0,833</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p class="note">Ref. = regra de repetir a classe atual; RF = Random Forest.</p>
+          <p class="note">RF = Random Forest.</p>
 
           <figure class="figure figure--wide" id="fig-matrizes">
-            <p class="figure__title">Figura 10. Matrizes de confusão no teste</p>
+            <p class="figure__title">Figura 9. Matrizes de confusão no teste</p>
             <div class="figure__controls">
               <button class="chip is-active" type="button" id="matriz-contagem" aria-pressed="true">Contagem</button>
               <button class="chip" type="button" id="matriz-percentual" aria-pressed="false">% da classe real</button>
             </div>
             <div class="matrices" id="matrizes" role="group"
-              aria-label="Matrizes de confusão da regra de referência, da Árvore de Decisão e do Random Forest"></div>
+              aria-label="Matrizes de confusão da Árvore de Decisão e do Random Forest"></div>
             <figcaption>Como ler: em cada matriz, as linhas são a classe real e as colunas, a prevista. Células na
               diagonal são acertos. A Árvore de Decisão errou 1.624 FALHAs reais ao prever RISCO, e o Random Forest
               errou 588 do mesmo tipo. Em ambos, a maior parte dos RISCOs reais foi prevista como OK ou FALHA.
@@ -1056,12 +975,8 @@
               encontra muito mais falhas reais, com precisão semelhante.</li>
             <li><strong>O papel da Árvore.</strong> A Árvore de Decisão é a melhor em recall de RISCO (40,6% contra
               22,5%), à custa de mais falsos alarmes: sua precisão em RISCO é de apenas 9,0%.</li>
-            <li><strong>A referência é exigente.</strong> Estados de rede tendem a persistir, então a classe atual já
-              acerta o estado de 12 minutos depois em 85,2% dos casos. Nessa régua, o Random Forest chega perto (F1
-              macro 0,630 contra 0,642), mas fica abaixo em acurácia e em recall de FALHA. Ele supera a referência no
-              recall de RISCO (22,5% contra 15,3%), no recall e no F1 de OK e na precisão de FALHA.</li>
-            <li><strong>RISCO é a classe difícil.</strong> Nenhuma abordagem passa de 15% de precisão em RISCO, e o F1
-              dessa classe fica perto de 0,15 nas três.</li>
+            <li><strong>RISCO é a classe difícil.</strong> Nenhum dos modelos passa de 12% de precisão em RISCO, e o F1
+              dessa classe fica perto de 0,15 nos dois.</li>
           </ul>
 
           <p class="note">Os tempos de treinamento e de predição do modelo final não estão registrados no repositório,
@@ -1170,7 +1085,7 @@
 
           <h3>O que mais pesou nas decisões</h3>
           <figure class="figure figure--wide" id="fig-importancia">
-            <p class="figure__title">Figura 11. Importância dos atributos</p>
+            <p class="figure__title">Figura 10. Importância dos atributos</p>
             <div class="figure__body" id="chart-importancia" role="img"
               aria-label="Gráfico de barras horizontais com a importância dos nove atributos no Random Forest e na Árvore de Decisão. O z_robusto é o mais importante nos dois modelos.">
             </div>
@@ -1191,15 +1106,6 @@
               entre as 3.713 do teste.</li>
             <li><strong>Falsos alarmes de RISCO.</strong> 581 medições OK foram previstas como RISCO.</li>
           </ul>
-
-          <aside class="callout" aria-label="Comparação com a regra de referência">
-            <p class="callout__title">E em relação à regra de referência?</p>
-            <p>O Random Forest é o melhor modelo treinado, mas a regra de repetir a classe atual obteve valores maiores
-              em acurácia (85,16% contra 82,72%), F1 macro (0,642 contra 0,630), balanced accuracy e recall de FALHA. O
-              Random Forest, por sua vez, tem recall de RISCO maior (22,5% contra 15,3%), assim como recall e F1 de OK e
-              precisão de FALHA (92,5% contra 87,9%). O NetPulse foi desenhado para prever a condição futura dos fluxos,
-              e esse resultado mostra um espaço claro de melhoria, discutido nas limitações.</p>
-          </aside>
         </section>
 
         <!-- ============ 8. API ============ -->
@@ -1472,8 +1378,7 @@ print(modelo.predict(medicao)[0])</code></pre>
             classificar a condição do fluxo 12 minutos adiante em OK, RISCO ou FALHA.</p>
 
           <p>Entre os modelos treinados, o Random Forest foi o melhor: F1 macro de 0,630, acurácia de 82,72% e recall de
-            FALHA de 75,73%, contra 0,555, 72,04% e 48,67% da Árvore de Decisão. A regra simples de repetir a classe
-            atual, usada como referência, obteve resultados gerais ainda maiores. A análise relativa ao comportamento de
+            FALHA de 75,73%, contra 0,555, 72,04% e 48,67% da Árvore de Decisão. A análise relativa ao comportamento de
             cada fluxo também aparece nos modelos: o <code>z_robusto</code>, que mede o desvio em relação ao normal do
             fluxo, foi o atributo mais importante em ambos.</p>
 
