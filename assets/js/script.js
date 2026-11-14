@@ -24,7 +24,6 @@
     // Matrizes de confusão no teste. Linhas: classe real. Colunas: classe prevista.
     // Ordem das classes: OK, RISCO, FALHA
     matrizes: {
-      referencia: [[7289, 510, 353], [456, 100, 97], [369, 73, 3271]],
       arvore: [[6946, 1065, 141], [361, 265, 27], [282, 1624, 1807]],
       floresta: [[7396, 581, 175], [453, 147, 53], [313, 588, 2812]]
     },
@@ -43,12 +42,12 @@
   };
 
   var CLASSES = ['OK', 'RISCO', 'FALHA'];
-  var NOMES = { referencia: 'Repetir classe atual', arvore: 'Árvore de Decisão', floresta: 'Random Forest' };
-  var SERIES = ['referencia', 'arvore', 'floresta'];
-  var COR_SERIE = { referencia: '#7f95b0', arvore: '#1687d7', floresta: '#35bb7c' };
+  var NOMES = { arvore: 'Árvore de Decisão', floresta: 'Random Forest' };
+  var SERIES = ['arvore', 'floresta'];
+  var COR_SERIE = { arvore: '#1687d7', floresta: '#35bb7c' };
   var COR_CLASSE = { OK: '#35bb7c', RISCO: '#e0a31a', FALHA: '#c8323e' };
   var CLASSE_BARRA = { OK: 'bar--ok', RISCO: 'bar--risco', FALHA: 'bar--falha' };
-  var SERIE_BARRA = { referencia: 'bar--ref', arvore: 'bar--tree', floresta: 'bar--rf' };
+  var SERIE_BARRA = { arvore: 'bar--tree', floresta: 'bar--rf' };
 
   /* ------------------------------------------------------------------------
      2. UTILITÁRIOS
@@ -491,7 +490,7 @@
     var esq = 40, dir = 8, topo = 26, base = 54, h = 380;
     var areaW = w - esq - dir, areaH = h - topo - base;
     var sy = function (v) { return topo + areaH - v * areaH; };
-    var grupo = areaW / itens.length, folga = 4, larg = Math.min(46, (grupo - 16) / 3);
+    var grupo = areaW / itens.length, folga = 4, larg = Math.min(46, (grupo - 16) / SERIES.length);
     var svg = criarSvg(w, h);
 
     [0, 0.25, 0.5, 0.75, 1].forEach(function (t) {
@@ -502,7 +501,7 @@
 
     itens.forEach(function (it, gi) {
       var cx = esq + gi * grupo + grupo / 2;
-      var inicio = cx - (3 * larg + 2 * folga) / 2;
+      var inicio = cx - (SERIES.length * larg + (SERIES.length - 1) * folga) / 2;
       SERIES.forEach(function (s, si) {
         var v = it.valores[s], x = inicio + si * (larg + folga);
         svgEl('rect', { x: x, y: sy(v), width: larg, height: sy(0) - sy(v), rx: 3, 'class': 'bar ' + SERIE_BARRA[s],
@@ -517,7 +516,7 @@
   }
 
   function metricasHorizontal(w, itens) {
-    var x0 = 8, x1 = w - 54, alturaBarra = 16, passoBarra = 20, bloco = 22 + 3 * passoBarra + 14, topo = 16;
+    var x0 = 8, x1 = w - 54, alturaBarra = 16, passoBarra = 20, bloco = 22 + SERIES.length * passoBarra + 14, topo = 16;
     var h = topo + itens.length * bloco + 4;
     var sx = function (v) { return x0 + v * (x1 - x0); };
     var svg = criarSvg(w, h);
