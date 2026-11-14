@@ -596,7 +596,6 @@ strong { color: var(--navy); }
 
 .bar { transition: opacity .2s; }
 .bar:hover, .bar:focus { opacity: .82; }
-.bar--ref { fill: #7f95b0; }
 .bar--tree { fill: var(--blue); }
 .bar--rf { fill: var(--green); }
 .bar--flow { fill: var(--teal); }
