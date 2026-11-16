@@ -175,7 +175,7 @@ O script gera uma página HTML para facilitar a consulta e comparação das info
 - Avaliar outros algoritmos e estratégias de ajuste de hiperparâmetros.
 - Ampliar os testes com dados de diferentes períodos e fluxos de rede.
 
-## 👨‍💻 Equipe e contexto acadêmico:
+## 👨‍💻 Equipe de Desenvolvimento:
 
 - Eduardo Gabriel de Souza Cardozo
 - Gabriel Alves de Farias
