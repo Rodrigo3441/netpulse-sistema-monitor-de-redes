@@ -11,14 +11,6 @@ Sistema para monitoramento de métricas de rede com análise em tempo real e pre
 [📖 Artigo do Projeto NetPulse](https://artigoprojetonetpulse.netlify.app/)<br>
 [📼 Acesso ao Vídeo Pitch do Projeto](https://www.youtube.com/watch?v=HbwWaYu635c)<br>
 
-## 👨‍💻 Equipe e contexto acadêmico:
-
-- Eduardo Gabriel de Souza Cardozo
-- Gabriel Alves de Farias
-- Gisele Franco de Lima
-- Luigi Santos Caires
-- Rodrigo de Souza Galvão
-
 Esse projeto possui conexão com as seguintes disciplinas:
 
 - Redes de Computadores
@@ -182,3 +174,11 @@ O script gera uma página HTML para facilitar a consulta e comparação das info
 - Explorar novos atributos e técnicas de engenharia de dados.
 - Avaliar outros algoritmos e estratégias de ajuste de hiperparâmetros.
 - Ampliar os testes com dados de diferentes períodos e fluxos de rede.
+
+## 👨‍💻 Equipe e contexto acadêmico:
+
+- Eduardo Gabriel de Souza Cardozo
+- Gabriel Alves de Farias
+- Gisele Franco de Lima
+- Luigi Santos Caires
+- Rodrigo de Souza Galvão
